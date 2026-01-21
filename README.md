@@ -4,7 +4,7 @@
 
 freesper is a privacy-focused, locally-running speech-to-text application for macOS, inspired by superwhisper. All processing happens on your device using optimized ML models.
 
-<img width="678" height="718" alt="Capture d’écran 2026-01-21 à 17 45 14" src="https://github.com/user-attachments/assets/41db3231-cf25-4bdc-8141-a7ddfa44ba50" />
+<img width="339" height="359" alt="Capture d’écran 2026-01-21 à 17 45 14" src="https://github.com/user-attachments/assets/41db3231-cf25-4bdc-8141-a7ddfa44ba50" />
 
 > ⚠️ **Important**: Models must be converted locally to ONNX format before use. See [MODEL_SETUP.md](./MODEL_SETUP.md) for a 5-minute quick start guide.
 
