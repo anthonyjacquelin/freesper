@@ -2,7 +2,7 @@
 
 **100% Offline Speech-to-Text for macOS**
 
-freesper is a privacy-focused, locally-running speech-to-text application for macOS, inspired by superwhisper. All processing happens on your device using optimized ML models.
+freesper is a privacy-focused, locally-running speech-to-text application for macOS. All processing happens on your device using optimized ML models.
 
 <img width="339" height="359" alt="Capture d’écran 2026-01-21 à 17 45 14" src="https://github.com/user-attachments/assets/41db3231-cf25-4bdc-8141-a7ddfa44ba50" />
 
