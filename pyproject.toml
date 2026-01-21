@@ -1,0 +1,15 @@
+[project]
+name = "freesper-scripts"
+version = "1.0.0"
+description = "Python scripts for freesper - 100% offline speech-to-text for macOS"
+requires-python = ">=3.10"
+dependencies = [
+    "librosa>=0.11.0",
+    "nemo-toolkit[asr]>=2.6.1",
+    "onnx-asr[cpu,hub]>=0.10.2",
+    "onnxscript>=0.5.7",
+    "pydub>=0.25.1",
+    "sherpa-onnx>=1.12.23",
+    "soundfile>=0.13.1",
+    "torchaudio>=2.9.1",
+]

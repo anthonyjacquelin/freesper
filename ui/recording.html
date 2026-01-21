@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recording</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      background: transparent;
+      overflow: hidden;
+      -webkit-app-region: drag;
+    }
+
+    .recording-container {
+      width: 400px;
+      height: 100px;
+      background: #000000;
+      border: 1px solid #333;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 0; /* Remove padding to let canvas fill */
+      position: relative;
+    }
+
+    /* Status Indicator */
+    .status-badge {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: #ff3b30;
+      border-radius: 50%;
+      animation: pulse-red 2s infinite;
+    }
+
+    .status-text {
+      color: #666;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-duration {
+      color: #666;
+      font-size: 11px;
+      font-weight: 500;
+      font-family: 'SF Mono', 'Monaco', monospace;
+      margin-left: 4px;
+    }
+
+    /* Waveform Area */
+    .waveform-container {
+      width: 100%;
+      height: 100%; /* Full height */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Processing State */
+    .processing-state {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      z-index: 20;
+      background: #000; /* Cover the waveform */
+      width: 100%;
+      height: 100%;
+      border-radius: 12px;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid #333;
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .processing-text {
+      color: #fff;
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    @keyframes pulse-red {
+      0% { opacity: 1; }
+      50% { opacity: 0.4; }
+      100% { opacity: 1; }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="recording-container">
+    <!-- Status (Recording / Processing) -->
+    <div class="status-badge" id="status-badge">
+      <div class="status-dot"></div>
+      <span class="status-text">REC</span>
+      <span class="status-duration" id="status-duration">0:00</span>
+    </div>
+
+    <!-- Visualization -->
+    <div class="waveform-container" id="visualizer-container">
+      <canvas id="visualizer"></canvas>
+    </div>
+
+    <!-- Processing State -->
+    <div class="processing-state" id="processing-state">
+      <div class="spinner"></div>
+      <span class="processing-text">Traitement...</span>
+    </div>
+  </div>
+
+  <script>
+    console.log('🔧 INLINE SCRIPT: Recording window script executing');
+    const { ipcRenderer } = require('electron');
+    console.log('🔧 INLINE SCRIPT: ipcRenderer loaded');
+
+    let audioContext = null;
+    let analyser = null;
+    let dataArray = null;
+    let animationId = null;
+    let recordingStartTime = null;
+    let durationIntervalId = null;
+    const canvas = document.getElementById('visualizer');
+    const canvasCtx = canvas.getContext('2d');
+    const durationElement = document.getElementById('status-duration');
+    
+    // Config
+    const BAR_WIDTH = 3;
+    const BAR_GAP = 3;
+    const BAR_COUNT = 32; // Number of bars per side (total = BAR_COUNT * 2 + 1 center)
+    const MAX_BAR_HEIGHT = 50; // Max height in pixels
+    const MIN_BAR_HEIGHT = 4; // Idle height
+
+    // Canvas sizing (High DPI)
+    function resizeCanvas() {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvasCtx.scale(dpr, dpr);
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    async function initAudioVisualization() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioContext.createAnalyser();
+        const source = audioContext.createMediaStreamSource(stream);
+
+        // FFT Size: Needs to be large enough to get good resolution on low frequencies (voice)
+        analyser.fftSize = 256; 
+        analyser.smoothingTimeConstant = 0.8; // Smooth reaction
+
+        const bufferLength = analyser.frequencyBinCount;
+        dataArray = new Uint8Array(bufferLength);
+
+        source.connect(analyser);
+        drawSiriWaveform();
+      } catch (error) {
+        console.error('Audio init failed:', error);
+      }
+    }
+
+    let idleOffset = 0; // For breathing animation
+
+    function drawSiriWaveform() {
+      if (!analyser) return;
+
+      animationId = requestAnimationFrame(drawSiriWaveform);
+      analyser.getByteFrequencyData(dataArray);
+
+      const width = canvas.offsetWidth;
+      const height = canvas.offsetHeight;
+      const centerY = height / 2;
+      const centerX = width / 2;
+      
+      canvasCtx.clearRect(0, 0, width, height);
+
+      // Increment idle animation
+      idleOffset += 0.05;
+
+      // We want to draw bars from center outwards
+      // We focus on the lower part of the spectrum (indices 0 to ~40) where voice is
+      
+      for (let i = 0; i <= BAR_COUNT; i++) {
+        // Map bar index to frequency bin. 
+        // We skip the very first bins (often DC offset/rumble)
+        // We spread indices 2 to 30 across our bars
+        const binIndex = Math.floor(i * 0.8) + 2;
+        let value = dataArray[binIndex] || 0;
+
+        // Normalize (0-1)
+        let percent = value / 255;
+        
+        // Enhance dynamics: non-linear scaling (makes quiet sounds quieter, loud sounds distinct)
+        percent = Math.pow(percent, 2); 
+        
+        // Calculate height
+        let barHeight = percent * MAX_BAR_HEIGHT;
+
+        // Add "Idle Breathing" animation
+        // Creates a wave effect even when silent
+        const idleHeight = Math.sin(idleOffset + i * 0.5) * 2 + MIN_BAR_HEIGHT;
+        
+        // Final height is max of audio or idle
+        // Multiply audio effect to make it jumpy
+        barHeight = Math.max(idleHeight, barHeight * 1.5); 
+        
+        // Attenuation at edges (bars get smaller as they go out)
+        const attenuation = 1 - (i / BAR_COUNT);
+        barHeight *= attenuation;
+
+        // Color & Opacity
+        // Center bars are brighter/more opaque
+        const opacity = 0.4 + (percent * 0.6) + (attenuation * 0.2); 
+        canvasCtx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, opacity)})`;
+
+        // Draw Right Side
+        let xRight = centerX + (i * (BAR_WIDTH + BAR_GAP));
+        roundRect(canvasCtx, xRight, centerY - barHeight / 2, BAR_WIDTH, barHeight, BAR_WIDTH/2);
+
+        // Draw Left Side (Mirror), skip center one (i=0) to avoid double drawing
+        if (i > 0) {
+          let xLeft = centerX - (i * (BAR_WIDTH + BAR_GAP));
+          roundRect(canvasCtx, xLeft, centerY - barHeight / 2, BAR_WIDTH, barHeight, BAR_WIDTH/2);
+        }
+      }
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      if (height < radius * 2) radius = height / 2;
+      ctx.beginPath();
+      ctx.roundRect(x, y, width, height, radius);
+      ctx.fill();
+    }
+
+    function formatDuration(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function startDurationTimer() {
+      recordingStartTime = Date.now();
+      durationElement.textContent = '0:00';
+      
+      durationIntervalId = setInterval(() => {
+        const elapsed = (Date.now() - recordingStartTime) / 1000;
+        durationElement.textContent = formatDuration(elapsed);
+      }, 100);
+    }
+
+    function stopDurationTimer() {
+      if (durationIntervalId) {
+        clearInterval(durationIntervalId);
+        durationIntervalId = null;
+      }
+      recordingStartTime = null;
+      durationElement.textContent = '0:00';
+    }
+
+    function stopVisualization() {
+      if (animationId) cancelAnimationFrame(animationId);
+      if (audioContext) audioContext.close();
+      audioContext = null;
+      analyser = null;
+      
+      const width = canvas.offsetWidth;
+      const height = canvas.offsetHeight;
+      canvasCtx.clearRect(0, 0, width, height);
+    }
+
+    ipcRenderer.on('recording-status', (event, data) => {
+      const visualizerContainer = document.getElementById('visualizer-container');
+      const processingState = document.getElementById('processing-state');
+      const statusBadge = document.getElementById('status-badge');
+
+      if (data.status === 'recording') {
+        visualizerContainer.style.display = 'flex';
+        processingState.style.display = 'none';
+        statusBadge.style.display = 'flex';
+        
+        if (!audioContext) {
+          initAudioVisualization();
+        }
+        
+        // Start duration timer
+        startDurationTimer();
+      } else if (data.status === 'processing') {
+        visualizerContainer.style.display = 'none';
+        processingState.style.display = 'flex';
+        statusBadge.style.display = 'none';
+        
+        stopVisualization();
+        stopDurationTimer();
+      }
+    });
+
+    // Handle sound playback
+    ipcRenderer.on('play-sound', (event, data) => {
+      playSound(data.url);
+    });
+
+    /**
+     * Play a sound file using HTML5 Audio
+     * @param {string} url - file:// URL to sound file
+     */
+    function playSound(url) {
+      if (!url) {
+        console.warn('No sound URL provided');
+        return;
+      }
+
+      try {
+        const audio = new Audio(url);
+        audio.volume = 0.6; // 60% volume
+        audio.play().catch(error => {
+          console.error('Failed to play sound:', error);
+        });
+      } catch (error) {
+        console.error('Failed to create audio:', error);
+      }
+    }
+  </script>
+  
+  <!-- Native audio recording handler -->
+  <script>
+    console.log('🔧 INLINE SCRIPT: About to load recordingRenderer.js');
+    try {
+      require('./recordingRenderer.js');
+      console.log('🔧 INLINE SCRIPT: recordingRenderer.js loaded successfully');
+    } catch (error) {
+      console.error('🔧 INLINE SCRIPT: Failed to load recordingRenderer.js:', error);
+    }
+  </script>
+</body>
+</html>

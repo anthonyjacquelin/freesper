@@ -1,0 +1,17 @@
+# Placeholder - Icon Needed
+
+To create the menu bar icon:
+
+1. Create a 32x32 PNG image with a microphone or speech bubble
+2. Make it black on transparent background
+3. Name it: iconTemplate.png
+4. Place it in this directory
+
+For now, the app will run without it (may show blank in menu bar)
+
+Quick way to create one:
+- Use any icon editor or online tool
+- Export as PNG at 32x32 or 16x16
+- Ensure it's monochrome (black with alpha)
+
+The app is fully functional without the icon!

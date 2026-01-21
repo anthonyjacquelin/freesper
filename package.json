@@ -1,0 +1,121 @@
+{
+  "name": "freesper",
+  "version": "1.0.0",
+  "description": "100% offline speech-to-text for macOS",
+  "main": "src/main.js",
+  "author": "freesper",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "rebuild": "electron-rebuild -f -w onnxruntime-node",
+    "postinstall": "electron-rebuild -f -w onnxruntime-node"
+  },
+  "dependencies": {
+    "electron-store": "^8.1.0",
+    "onnxruntime-node": "^1.23.2",
+    "wav": "^1.0.2"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "electron-rebuild": "^3.2.9"
+  },
+  "build": {
+    "appId": "com.freesper.app",
+    "productName": "freesper",
+    "compression": "maximum",
+    "asar": true,
+    "asarUnpack": [
+      "**/*.node",
+      "**/node_modules/onnxruntime-node/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.icns",
+      "identity": "Apple Development: Anthony Jacquelin (RJV6P2TLC7)",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "freesper utilise le microphone pour enregistrer votre voix et la transcrire en texte.",
+        "NSAppleEventsUsageDescription": "freesper envoie des événements AppleScript pour coller automatiquement le texte transcrit dans l'application active."
+      }
+    },
+    "dmg": {
+      "title": "${productName} ${version}",
+      "icon": "assets/icon.icns",
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 144,
+          "y": 150,
+          "type": "file"
+        },
+        {
+          "x": 396,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "files": [
+      "src/**/*",
+      "ui/**/*",
+      "assets/**/*",
+      "package.json",
+      "node_modules/onnxruntime-node/bin/napi-v6/darwin/arm64/**/*",
+      "node_modules/onnxruntime-node/dist/**/*",
+      "node_modules/onnxruntime-node/package.json",
+      "!models/**",
+      "!.venv/**",
+      "!**/node_modules/onnxruntime-node/bin/napi-v6/linux/**",
+      "!**/node_modules/onnxruntime-node/bin/napi-v6/darwin/x64/**",
+      "!**/node_modules/onnxruntime-node/bin/napi-v6/win32/**",
+      "!**/*.{ts,tsx}",
+      "!**/*.map",
+      "!**/node_modules/**/README.md",
+      "!**/node_modules/**/CHANGELOG.md",
+      "!**/node_modules/**/LICENSE",
+      "!**/node_modules/**/{test,tests,__tests__}/**",
+      "!**/node_modules/**/*.{md,markdown}",
+      "!**/node_modules/**/.{git,github}",
+      "!**/node_modules/*/{example,examples}/**",
+      "!**/node_modules/**/*.d.ts",
+      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
+      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
+      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
+      "!**/{appveyor.yml,.travis.yml,circle.yml}",
+      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "extraResources": [
+      {
+        "from": "scripts",
+        "to": "scripts",
+        "filter": [
+          "*.py"
+        ]
+      }
+    ]
+  }
+}

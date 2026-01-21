@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>freesper</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-view="model-manager">Modèles</button>
+      <button class="nav-tab" data-view="history">Historique</button>
+      <button class="nav-tab" data-view="settings">Paramètres</button>
+    </div>
+
+    <!-- Model Manager View -->
+    <div id="model-manager-view" class="view active">
+      <div class="header">
+        <h1>Model Manager</h1>
+      </div>
+
+      <div class="section">
+        <h2>Installed Models</h2>
+        <div id="installed-models" class="model-list">
+          <p class="empty-state">No models installed yet</p>
+        </div>
+      </div>
+
+      <div class="section" id="available-models-section">
+        <h2>Available Models</h2>
+        <div class="info-banner">
+          <span class="info-icon">✨</span>
+          <div>
+            <strong>Modèles disponibles</strong>
+            <p>Installez le modèle Parakeet INT8 pour commencer à transcrire en haute qualité.</p>
+          </div>
+        </div>
+        <div id="available-models" class="model-list">
+          <p class="empty-state">Loading...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings View -->
+    <div id="settings-view" class="view">
+      <div class="header">
+        <h1>Settings</h1>
+      </div>
+
+      <div class="section">
+        <h2>Raccourci Clavier</h2>
+        
+        <div class="hotkey-capture-group">
+          <label for="hotkey">Touche d'enregistrement</label>
+          <div class="hotkey-display" id="hotkey-display">
+            <div class="hotkey-keys" id="hotkey-keys">
+              <span class="key-badge">Cmd</span>
+              <span class="key-plus">+</span>
+              <span class="key-badge">Shift</span>
+              <span class="key-plus">+</span>
+              <span class="key-badge">Space</span>
+            </div>
+            <div class="hotkey-prompt" id="hotkey-prompt" style="display: none;">
+              Appuyez sur votre combinaison de touches...
+            </div>
+          </div>
+          <p class="hint">Cliquez sur le champ ci-dessus et appuyez sur une touche simple (F5, A, etc.) ou une combinaison (Cmd+Shift+R)</p>
+        </div>
+
+        <label for="language">Langue</label>
+        <select id="language">
+          <option value="auto">Détection Automatique</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="zh">中文</option>
+          <option value="ja">日本語</option>
+        </select>
+
+        <label>
+          <input type="checkbox" id="auto-paste">
+          Coller automatiquement après la transcription
+        </label>
+
+        <button id="save-settings" class="primary-btn">Enregistrer les Paramètres</button>
+      </div>
+    </div>
+
+    <!-- History View -->
+    <div id="history-view" class="view">
+      <div class="header">
+        <h1>Historique des Transcriptions</h1>
+      </div>
+
+      <div class="section">
+        <div class="history-header-actions">
+          <button id="clear-history-btn" class="danger-btn" style="margin-bottom: 20px;">
+            Effacer l'historique
+          </button>
+        </div>
+        <div id="history-list" class="history-list">
+          <p class="empty-state">Aucune transcription pour le moment</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
