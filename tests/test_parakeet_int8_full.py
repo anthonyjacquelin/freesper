@@ -9,7 +9,7 @@ import onnxruntime as ort
 from pydub import AudioSegment
 import librosa
 
-os.chdir('/Users/anthonyjacquelin/Documents/dev/freesper/tests')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 MODEL_DIR = "../models/parakeet-tdt-0.6b-v3-int8"
 

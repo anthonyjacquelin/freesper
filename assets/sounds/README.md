@@ -20,10 +20,6 @@ Ce dossier contient les fichiers audio utilisés pour le feedback sonore lors de
 
 L'application sélectionne aléatoirement un son parmi les variations disponibles pour chaque événement (démarrage/arrêt), ce qui rend l'expérience plus naturelle et moins monotone.
 
-## Source
-
-Les fichiers audio ont été extraits de SuperWhisper, une application similaire de transcription vocale.
-
 ## Format
 
 - Format : M4A (AAC)

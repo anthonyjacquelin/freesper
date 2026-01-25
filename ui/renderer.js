@@ -3,12 +3,26 @@ const { ipcRenderer } = require('electron');
 let currentView = 'model-manager-view';
 let isCapturingHotkey = false;
 let capturedKeys = [];
+let loadModelsDebounceTimer = null;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
   await loadModels();
   await loadSettings();
   await loadHistory();
+
+  // Window controls
+  document.getElementById('close-button')?.addEventListener('click', () => {
+    ipcRenderer.send('window-close');
+  });
+
+  document.getElementById('minimize-button')?.addEventListener('click', () => {
+    ipcRenderer.send('window-minimize');
+  });
+
+  document.getElementById('maximize-button')?.addEventListener('click', () => {
+    ipcRenderer.send('window-maximize');
+  });
 
   // Set up event listeners
   document.getElementById('save-settings')?.addEventListener('click', saveSettings);
@@ -325,11 +339,16 @@ function updateInstallButton(data) {
         progressFill.style.width = '100%';
         progressPercent.textContent = '100%';
         
-        // Hide progress and reload models after a short delay
+        // Hide progress and reload models after a short delay (debounced)
         setTimeout(() => {
           if (progressContainer) progressContainer.style.display = 'none';
           if (modelCard) modelCard.classList.remove('downloading');
-          loadModels();
+
+          // Debounce loadModels to prevent multiple simultaneous calls
+          if (loadModelsDebounceTimer) clearTimeout(loadModelsDebounceTimer);
+          loadModelsDebounceTimer = setTimeout(() => {
+            loadModels();
+          }, 500);
         }, 1500);
       } else if (stage === 'error') {
         progressMessage.textContent = 'Une erreur est survenue';

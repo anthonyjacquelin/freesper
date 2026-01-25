@@ -6,7 +6,7 @@ Test final avec Parakeet INT8 - API sherpa-onnx simplifiée
 import os
 import numpy as np
 
-os.chdir('/Users/anthonyjacquelin/Documents/dev/freesper/tests')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 print("=" * 60)
 print("🦜 Test Parakeet INT8 (sherpa-onnx)")

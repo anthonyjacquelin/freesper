@@ -8,7 +8,7 @@ import numpy as np
 from pydub import AudioSegment
 import time
 
-os.chdir('/Users/anthonyjacquelin/Documents/dev/freesper/tests')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 AUDIO_FILE = "ElevenLabs_2026-01-18T17_00_27_Lea - UGC creator_pvc_sp108_s51_sb72_se2_m2.mp3"
 

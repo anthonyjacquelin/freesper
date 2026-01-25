@@ -6,7 +6,7 @@ Test de la version INT8 optimisée de Parakeet (sherpa-onnx)
 import os
 import onnx_asr
 
-os.chdir('/Users/anthonyjacquelin/Documents/dev/freesper/tests')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 MODEL_DIR = "../models/parakeet-tdt-0.6b-v3-int8"
 

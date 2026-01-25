@@ -1,7 +1,7 @@
 # Project Context
 
 ## Purpose
-Freesper is a privacy-focused, 100% offline speech-to-text application for macOS. It enables users to transcribe audio in real-time using local ML models without sending data to external servers. The application aims to match the performance and user experience of superwhisper while remaining completely open-source and privacy-preserving.
+Freesper is a privacy-focused, 100% offline speech-to-text application for macOS. It enables users to transcribe audio in real-time using local ML models without sending data to external servers. The application is completely open-source and privacy-preserving.
 
 ## Tech Stack
 - **Runtime**: Electron 28 (Node.js + Chromium)

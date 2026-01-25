@@ -1,0 +1,12 @@
+# robots.txt for freesper.com
+# Allow all search engines to crawl the site
+
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://freesper.com/sitemap.xml
+
+# Disallow crawling of download files to save bandwidth
+User-agent: *
+Disallow: /*.dmg$

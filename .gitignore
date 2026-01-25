@@ -10,6 +10,7 @@ build/
 *.app
 *.dmg
 *.zip
+python-venv.tar.gz
 
 # macOS
 .DS_Store
@@ -41,6 +42,7 @@ recordings/
 *.swp
 *.swo
 *~
+scripts/sign-and-build.sh
 
 # Logs
 logs/
@@ -55,9 +57,49 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
+.venv/
 .Python
+python/
+python-venv/
+uv.lock
 
-# Certificates
+# Certificates and signing
 *.p12
 *.cer
 *.certSigningRequest
+*.provisionprofile
+
+# AI Assistant directories
+.agent/
+.agents/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.trae/
+.aider*
+.opencode/
+
+# Private keys (additional patterns)
+*.key
+*.pem
+*.pfx
+
+# Local config files
+config.local.*
+.npmrc
+
+# Database files (if applicable)
+*.sqlite
+*.sqlite3
+*.db
+
+# Common secret directories
+secrets/
+private/
+credentials/
+
+# Backup files that might contain sensitive data
+*.backup
+*.bak
+*.old

@@ -6,7 +6,7 @@ Transcription avec Parakeet TDT v3 INT8 via sherpa-onnx
 import os
 import sherpa_onnx
 
-os.chdir('/Users/anthonyjacquelin/Documents/dev/freesper/tests')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 MODEL_DIR = "../models/parakeet-tdt-0.6b-v3-int8"
 

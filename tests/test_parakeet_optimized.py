@@ -6,7 +6,7 @@ Test des versions optimisées de Parakeet TDT v3
 import os
 from pydub import AudioSegment
 
-os.chdir('/Users/anthonyjacquelin/Documents/dev/freesper/tests')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def convert_to_wav(audio_file, target_sr=16000):
     """Convertit un fichier audio en WAV mono 16kHz"""

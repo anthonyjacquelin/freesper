@@ -158,6 +158,44 @@ Download from [Hugging Face Whisper Models](https://huggingface.co/openai/whispe
 
 ## 🔧 Development
 
+### Code Signing & Distribution (for Contributors)
+
+This project can be code-signed and notarized for distribution on macOS. If you fork this project:
+
+**What's in the Repo (Public & Safe):**
+- ✅ Team ID (`FZ9SPN6Y22` in `package.json`) - This is public metadata, visible in all signed apps
+- ✅ Build configuration and entitlements
+
+**What You Need (Private - Not in Repo):**
+- 🔐 **Apple Developer certificate** - Stored in macOS Keychain (auto-detected by electron-builder)
+- 🔐 **Notarization credentials** - Apple ID + app-specific password via environment variables
+
+**Setup for Building:**
+
+1. Get an Apple Developer account at https://developer.apple.com
+
+2. Install your Developer ID certificate in macOS Keychain
+
+3. Create an app-specific password at https://appleid.apple.com
+
+4. Set environment variables and build:
+```bash
+# Set credentials (or use .env file)
+export APPLE_ID="your-email@example.com"
+export APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx"
+
+# Build with notarization
+npm run build
+```
+
+**For Forked Repos**: Replace the `teamId` in `package.json` with your own Apple Developer Team ID.
+
+**Security Note**: All sensitive information is stored in environment variables or macOS Keychain, never in the repository. The `.gitignore` excludes:
+- `.env` - Your credentials (if using .env file)
+- `*.p12`, `*.cer` - Certificate files
+- `dist/` - Build outputs
+- `scripts/` - Local build scripts with personal info
+
 ### Project Structure
 
 ```
@@ -275,9 +313,9 @@ node -e "require('onnxruntime-node').InferenceSession.create('model.onnx').then(
 
 ## 🔬 Technical Deep Dive
 
-### How superwhisper Achieves Speed
+### Performance Optimization Techniques
 
-Based on reverse engineering:
+Based on analysis of similar tools:
 
 1. **GGML + Metal** - Custom inference with GPU acceleration
 2. **Quantized Models** - INT4/INT8 compression (5-10x faster)
@@ -329,7 +367,6 @@ MIT
 
 ## 🙏 Acknowledgments
 
-- Inspired by [superwhisper](https://superwhisper.com/)
 - Models by [NVIDIA](https://huggingface.co/nvidia) and [OpenAI](https://openai.com/research/whisper)
 - Powered by [ONNX Runtime](https://onnxruntime.ai/)
 
@@ -358,4 +395,4 @@ For issues and questions, please open an issue on GitHub.
 
 ---
 
-**Built with privacy in mind. Your voice never leaves your device.** 🔒
+**Built with privacy in mind. Your voice never leaves your Mac.** 🔒

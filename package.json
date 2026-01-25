@@ -8,11 +8,13 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
+    "prebuild": "node scripts/download-python-standalone.js",
     "build": "electron-builder",
     "rebuild": "electron-rebuild -f -w onnxruntime-node",
     "postinstall": "electron-rebuild -f -w onnxruntime-node"
   },
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "electron-store": "^8.1.0",
     "onnxruntime-node": "^1.23.2",
     "wav": "^1.0.2"
@@ -29,7 +31,8 @@
     "asar": true,
     "asarUnpack": [
       "**/*.node",
-      "**/node_modules/onnxruntime-node/**/*"
+      "**/node_modules/onnxruntime-node/**/*",
+      "**/node_modules/@ffmpeg-installer/**/*"
     ],
     "mac": {
       "category": "public.app-category.productivity",
@@ -48,11 +51,13 @@
         }
       ],
       "icon": "assets/icon.icns",
-      "identity": "Apple Development: Anthony Jacquelin (RJV6P2TLC7)",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "entitlements.mac.plist",
       "entitlementsInherit": "entitlements.mac.plist",
+      "notarize": {
+        "teamId": "FZ9SPN6Y22"
+      },
       "extendInfo": {
         "NSMicrophoneUsageDescription": "freesper utilise le microphone pour enregistrer votre voix et la transcrire en texte.",
         "NSAppleEventsUsageDescription": "freesper envoie des événements AppleScript pour coller automatiquement le texte transcrit dans l'application active."
@@ -87,6 +92,7 @@
       "node_modules/onnxruntime-node/bin/napi-v6/darwin/arm64/**/*",
       "node_modules/onnxruntime-node/dist/**/*",
       "node_modules/onnxruntime-node/package.json",
+      "node_modules/@ffmpeg-installer/**/*",
       "!models/**",
       "!.venv/**",
       "!**/node_modules/onnxruntime-node/bin/napi-v6/linux/**",
@@ -114,6 +120,13 @@
         "to": "scripts",
         "filter": [
           "*.py"
+        ]
+      },
+      {
+        "from": "python",
+        "to": "python",
+        "filter": [
+          "**/*"
         ]
       }
     ]

@@ -64,6 +64,76 @@ body {
   height: 100vh;
 }
 
+/* ===== macOS Window Controls ===== */
+.window-controls {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px;
+  align-items: center;
+  -webkit-app-region: no-drag;
+}
+
+.window-button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.15s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  font-weight: bold;
+  color: transparent;
+}
+
+.window-button.close {
+  background: #FF5F57;
+}
+
+.window-button.minimize {
+  background: #FFBD2E;
+}
+
+.window-button.maximize {
+  background: #28CA42;
+}
+
+/* Show symbols on hover */
+.window-controls:hover .window-button.close::before {
+  content: '×';
+  color: #4D0000;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.window-controls:hover .window-button.minimize::before {
+  content: '−';
+  color: #6A4B00;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.window-controls:hover .window-button.maximize::before {
+  content: '+';
+  color: #006400;
+  font-size: 12px;
+  line-height: 1;
+  transform: rotate(45deg);
+  display: inline-block;
+}
+
+.window-button:hover {
+  filter: brightness(0.9);
+}
+
+.window-button:active {
+  filter: brightness(0.8);
+}
+
 /* ===== Navigation Tabs ===== */
 .nav-tabs {
   display: flex;
@@ -71,6 +141,8 @@ body {
   border-bottom: 1px solid var(--border-subtle);
   padding: 0;
   gap: 0;
+  align-items: center;
+  -webkit-app-region: drag; /* Make entire tab bar draggable */
 }
 
 .nav-tab {
@@ -86,6 +158,7 @@ body {
   transition: all 0.2s;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  -webkit-app-region: no-drag; /* Keep buttons clickable */
 }
 
 .nav-tab:hover {
@@ -106,6 +179,7 @@ body {
   height: 100%;
   overflow-y: auto; /* Global scroll */
   padding-bottom: 40px;
+  -webkit-app-region: drag; /* Make content area draggable */
 }
 
 .view.active {
@@ -205,6 +279,7 @@ body {
   border-radius: var(--radius-md);
   padding: 20px 24px;
   transition: all 0.2s ease;
+  -webkit-app-region: no-drag; /* Keep cards interactive */
 }
 
 .model-card:hover {
@@ -279,6 +354,7 @@ button {
   cursor: default;
   transition: all 0.15s;
   letter-spacing: 0.02em;
+  -webkit-app-region: no-drag; /* Keep buttons clickable */
 }
 
 /* Primary Button - Dark Grey */
@@ -358,6 +434,7 @@ select {
   font-size: 13px;
   outline: none;
   transition: border-color 0.2s;
+  -webkit-app-region: no-drag; /* Keep inputs clickable */
 }
 
 input[type="text"]:focus,
@@ -406,6 +483,7 @@ input[type="checkbox"]:checked::after {
 /* ===== Hotkey Configuration ===== */
 .hotkey-capture-group {
   margin-bottom: 32px;
+  -webkit-app-region: no-drag; /* Allow hotkey interaction */
 }
 
 .hotkey-display {
@@ -420,6 +498,7 @@ input[type="checkbox"]:checked::after {
   align-items: center;
   justify-content: center;
   position: relative;
+  -webkit-app-region: no-drag; /* Make hotkey field clickable */
 }
 
 .hotkey-display:hover {
@@ -523,6 +602,7 @@ input.capturing {
   border-radius: var(--radius-md);
   padding: 20px 24px;
   transition: all 0.2s ease;
+  -webkit-app-region: no-drag; /* Keep cards interactive */
 }
 
 .history-card:hover {

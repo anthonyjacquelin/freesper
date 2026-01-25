@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.abspath('../models'))
 
 import onnx_asr
 
-os.chdir('/Users/anthonyjacquelin/Documents/dev/freesper/tests')
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 MODEL_PATH = os.path.abspath("../models/parakeet-tdt-0.6b-v3-int8")
 

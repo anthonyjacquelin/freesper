@@ -6,6 +6,7 @@ const AudioRecorder = require('./modules/audioRecorder');
 const InferenceEngine = require('./modules/inferenceEngine');
 const ModelManager = require('./modules/modelManager');
 const SoundManager = require('./modules/soundManager');
+const PythonManager = require('./modules/pythonManager');
 
 // Initialize store for settings
 const store = new Store();
@@ -67,10 +68,12 @@ if (app.isPackaged) {
 let tray = null;
 let mainWindow = null;
 let recordingWindow = null;
+let setupWindow = null;
 let audioRecorder = null;
 let inferenceEngine = null;
 let modelManager = null;
 let soundManager = null;
+let pythonManager = null;
 let hasAccessibilityPermission = false;
 
 // Recording state
@@ -91,28 +94,30 @@ async function checkAccessibilityPermissions() {
   }
 
   // In dev mode, skip permission dialog (Electron won't appear in System Preferences)
-  const isDevMode = process.argv.includes('--dev');
   const isPackaged = app.isPackaged;
+  const isDevMode = !isPackaged; // Dev mode = not packaged
   console.log('   Dev mode:', isDevMode);
   console.log('   Is packaged:', isPackaged);
-  
-  // Check if we already have permission
+
+  // In dev mode, just warn and continue without permissions
+  // (Electron dev app won't appear properly in System Preferences)
+  if (isDevMode) {
+    console.log('ℹ️  Mode développement détecté');
+    console.log('   Vérification des permissions d\'accessibilité ignorée');
+    console.log('   Auto-paste désactivé en dev (nécessite app packagée)');
+    console.log('   Le texte sera copié dans le presse-papiers');
+    hasAccessibilityPermission = false;
+    return false;
+  }
+
+  // Check if we already have permission (production only)
   const isTrusted = systemPreferences.isTrustedAccessibilityClient(false);
   console.log('   isTrustedAccessibilityClient(false) returned:', isTrusted);
-  
+
   if (isTrusted) {
     hasAccessibilityPermission = true;
     console.log('✅ Accessibility permissions granted');
     return true;
-  }
-
-  // In dev mode, just warn and continue without permissions
-  if (isDevMode) {
-    console.log('ℹ️  Mode développement détecté');
-    console.log('   Auto-paste désactivé (nécessite app packagée)');
-    console.log('   Le texte sera copié dans le presse-papiers');
-    hasAccessibilityPermission = false;
-    return false;
   }
 
   // Show dialog explaining why we need permissions (production only)
@@ -230,7 +235,7 @@ function createMainWindow() {
     resizable: true,
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false // TODO: Enable contextIsolation for security (requires preload script refactor)
     }
   });
 
@@ -239,7 +244,7 @@ function createMainWindow() {
   // Show window when ready
   mainWindow.once('ready-to-show', () => {
     console.log('Main window ready');
-    // Don't show by default - only show when needed
+    mainWindow.show(); // Show window on startup
   });
 
   // Enable DevTools in dev mode
@@ -335,7 +340,13 @@ async function toggleRecording() {
 
 async function startRecording() {
   if (!inferenceEngine.isModelLoaded()) {
-    showNotification('Error', 'Please download and load a model before recording');
+    console.log('❌ Cannot start recording: No model loaded');
+    showNotification('Modèle requis', 'Veuillez télécharger et activer un modèle avant d\'enregistrer');
+
+    // Also show the model manager to help user
+    setTimeout(() => {
+      showModelManager();
+    }, 1000);
     return;
   }
 
@@ -369,21 +380,8 @@ async function stopRecording() {
 
   console.log('Stopping recording...');
   isRecording = false;
-  isProcessing = true; // Lock to prevent double processing
-
-  // Safety timeout: unlock after 30 seconds no matter what
-  const safetyTimeout = setTimeout(() => {
-    if (isProcessing) {
-      console.error('⚠️  SAFETY TIMEOUT: Force unlocking isProcessing after 30s');
-      isProcessing = false;
-      isRecording = false;
-      audioRecorder.reset(); // Reset audio recorder state
-      hideRecordingWindow();
-    }
-  }, 30000);
-
-  // Store timeout ID to clear it on success
-  global.processingTimeout = safetyTimeout;
+  // Don't set isProcessing = true here - let audio-data-recorded handler do it
+  // This prevents the race condition where isProcessing is true before data arrives
 
   // Play stop beep
   playBeep('stop');
@@ -584,18 +582,31 @@ ipcMain.handle('get-settings', async () => {
 
 // Handle audio data from renderer process
 ipcMain.handle('audio-data-recorded', async (event, audioData) => {
-  try {
-    // Clear safety timeout first
-    if (global.processingTimeout) {
-      clearTimeout(global.processingTimeout);
-      global.processingTimeout = null;
-      console.log('✓ Safety timeout cleared');
+  // Prevent race condition: check if already processing
+  if (isProcessing) {
+    console.warn('⚠️  Already processing a transcription, ignoring new request');
+    return { success: false, error: 'Already processing' };
+  }
+
+  isProcessing = true;
+
+  // Safety timeout: unlock after 30 seconds no matter what
+  const safetyTimeout = setTimeout(() => {
+    if (isProcessing) {
+      console.error('⚠️  SAFETY TIMEOUT: Force unlocking isProcessing after 30s');
+      isProcessing = false;
+      isRecording = false;
+      audioRecorder.reset();
+      hideRecordingWindow();
     }
+  }, 30000);
+
+  try {
+    // Clear safety timeout on success (will be cleared in finally block)
 
     // Check if audio data is valid
-    if (!audioData || audioData.byteLength === 0) {
-      console.error('❌ No audio data received from renderer');
-      isProcessing = false;
+    if (!audioData) {
+      console.error('❌ No audio data received from renderer (null or undefined)');
       audioRecorder.reset();
 
       if (recordingWindow && !recordingWindow.isDestroyed()) {
@@ -604,6 +615,18 @@ ipcMain.handle('audio-data-recorded', async (event, audioData) => {
       }
 
       return { success: false, error: 'No audio data' };
+    }
+
+    if (audioData.byteLength === 0) {
+      console.error('❌ Audio data is empty (0 bytes)');
+      audioRecorder.reset();
+
+      if (recordingWindow && !recordingWindow.isDestroyed()) {
+        recordingWindow.webContents.send('transcription-error', { error: 'Empty audio data' });
+        setTimeout(() => hideRecordingWindow(), 2000);
+      }
+
+      return { success: false, error: 'Empty audio data' };
     }
 
     console.log('📍 Received audio data from renderer:', audioData.byteLength, 'bytes');
@@ -623,13 +646,28 @@ ipcMain.handle('audio-data-recorded', async (event, audioData) => {
     
     const audioFilePath = path.join(tempDir, `recording_${Date.now()}.webm`);
     fs.writeFileSync(audioFilePath, buffer);
-    
+
     console.log('✓ Audio saved to:', audioFilePath);
     console.log('✓ File size:', (buffer.length / 1024).toFixed(2), 'KB');
 
-    // Run inference
-    console.log('📍 Starting transcription...');
-    const result = await inferenceEngine.transcribe(audioFilePath);
+    let transcriptionResult = null;
+    try {
+      // Run inference
+      console.log('📍 Starting transcription...');
+      transcriptionResult = await inferenceEngine.transcribe(audioFilePath);
+    } finally {
+      // Clean up temporary audio file
+      try {
+        if (fs.existsSync(audioFilePath)) {
+          fs.unlinkSync(audioFilePath);
+          console.log('✓ Temporary file cleaned up:', audioFilePath);
+        }
+      } catch (cleanupError) {
+        console.warn('⚠️  Failed to delete temp file:', cleanupError.message);
+      }
+    }
+
+    const result = transcriptionResult;
     const duration = Date.now() - startTime;
 
     // Extract text from result
@@ -664,23 +702,19 @@ ipcMain.handle('audio-data-recorded', async (event, audioData) => {
         await pasteToActiveApp();
       }
 
-      // Hide after delay and unlock
+      // Hide after delay (isProcessing will be unlocked in finally)
       setTimeout(() => {
         hideRecordingWindow();
-        isProcessing = false;
-        console.log('✓ Processing unlocked (success)');
       }, 1500);
-      
+
       return { success: true, text: transcriptionText };
     } else {
       console.warn('⚠️  No text transcribed');
       recordingWindow.webContents.send('transcription-error', { error: 'No text transcribed' });
-      
-      // Hide after delay and unlock
+
+      // Hide after delay (isProcessing will be unlocked in finally)
       setTimeout(() => {
         hideRecordingWindow();
-        isProcessing = false;
-        console.log('✓ Processing unlocked (no text)');
       }, 2000);
       
       return { success: false, error: 'No text transcribed' };
@@ -688,19 +722,26 @@ ipcMain.handle('audio-data-recorded', async (event, audioData) => {
   } catch (error) {
     console.error('❌ Transcription failed:', error);
     console.error('Stack:', error.stack);
-    
-    // Always unlock immediately on error and reset audio recorder
-    isProcessing = false;
+
+    // Reset audio recorder
     audioRecorder.reset();
-    console.log('✓ Processing unlocked (error)');
-    
+
     recordingWindow.webContents.send('transcription-error', { error: error.message });
-    
+
     setTimeout(() => {
       hideRecordingWindow();
     }, 2000);
 
     return { success: false, error: error.message };
+  } finally {
+    // Clear safety timeout
+    if (safetyTimeout) {
+      clearTimeout(safetyTimeout);
+    }
+
+    // Always unlock processing in finally block to prevent deadlock
+    isProcessing = false;
+    console.log('✓ Processing unlocked');
   }
 });
 
@@ -722,6 +763,29 @@ ipcMain.handle('get-history', async () => {
 ipcMain.handle('clear-history', async () => {
   store.set('transcriptionHistory', []);
   return { success: true };
+});
+
+// Window controls
+ipcMain.on('window-close', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.close();
+  }
+});
+
+ipcMain.on('window-minimize', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.minimize();
+  }
+});
+
+ipcMain.on('window-maximize', () => {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  }
 });
 
 function addToHistory(text, duration) {
@@ -770,50 +834,111 @@ function registerHotkeys() {
 }
 
 /**
- * Ensure Python dependencies are installed for Sherpa-ONNX models
- * This runs at startup to make sure the venv has all required packages
+ * Create setup window for Python dependency installation
+ */
+function createSetupWindow() {
+  setupWindow = new BrowserWindow({
+    width: 600,
+    height: 500,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false // TODO: Enable contextIsolation for security (requires preload script refactor)
+    }
+  });
+
+  setupWindow.loadFile(path.join(__dirname, '../ui/setup.html'));
+
+  setupWindow.once('ready-to-show', () => {
+    setupWindow.show();
+  });
+
+  setupWindow.on('closed', () => {
+    setupWindow = null;
+  });
+
+  return setupWindow;
+}
+
+/**
+ * Initialize Python environment with UI progress
+ * Shows setup window if dependencies need to be installed
  */
 async function ensurePythonDependencies() {
-  // Only check if Parakeet INT8 model is installed
-  const parakeetDir = path.join(app.getPath('userData'), 'models', 'parakeet-int8');
-  if (!fs.existsSync(parakeetDir)) {
-    console.log('Parakeet INT8 not installed, skipping Python dependency check');
+  console.log('🐍 Checking Python environment...');
+
+  // Check if already initialized
+  if (pythonManager.isDependenciesInstalled()) {
+    console.log('✓ Python dependencies already installed');
+    pythonManager.pythonExecutable = pythonManager.getPythonExecutable();
+    pythonManager.isInitialized = true;
     return;
   }
 
-  const venvDir = path.join(app.getPath('userData'), 'python-venv');
-  const venvPython = path.join(venvDir, 'bin', 'python3');
+  console.log('⚠️  Python dependencies not found, starting installation...');
 
-  // Check if venv exists
-  if (!fs.existsSync(venvPython)) {
-    console.log('Python venv not found, will be created when needed');
-    return;
-  }
+  // Create setup window
+  const window = createSetupWindow();
 
-  // Check if sherpa-onnx is installed
-  const { exec } = require('child_process');
-  const { promisify } = require('util');
-  const execAsync = promisify(exec);
+  return new Promise((resolve, reject) => {
+    // Wait for renderer to be ready
+    ipcMain.once('setup-ready', async () => {
+      try {
+        // Initialize Python with progress updates
+        await pythonManager.initialize((progress, message) => {
+          window.webContents.send('setup-progress', { progress, message });
+        });
 
-  try {
-    // Check if all required dependencies are installed
-    await execAsync(`"${venvPython}" -c "import sherpa_onnx; import torch; import torchaudio"`, { timeout: 10000 });
-    console.log('✓ Python dependencies (sherpa-onnx, torch, torchaudio) already installed');
-  } catch (error) {
-    console.log('Missing Python dependencies, installing...');
-    
-    try {
-      const venvPip = path.join(venvDir, 'bin', 'pip');
-      await execAsync(`"${venvPip}" install sherpa-onnx soundfile torch torchaudio`, {
-        timeout: 180000,
-        maxBuffer: 1024 * 1024 * 10
-      });
-      console.log('✓ Python dependencies installed successfully');
-    } catch (installError) {
-      console.error('Failed to install Python dependencies:', installError.message);
-      console.warn('⚠️  Transcription with Parakeet INT8 may not work');
-    }
-  }
+        // Send completion event
+        window.webContents.send('setup-complete');
+
+        console.log('✅ Python environment ready');
+
+        // Close window after a short delay
+        setTimeout(() => {
+          if (window && !window.isDestroyed()) {
+            window.close();
+          }
+          resolve();
+        }, 1500);
+
+      } catch (error) {
+        console.error('❌ Python initialization failed:', error);
+        window.webContents.send('setup-error', error.message);
+
+        // Handle retry
+        ipcMain.once('setup-retry', async () => {
+          try {
+            await pythonManager.initialize((progress, message) => {
+              window.webContents.send('setup-progress', { progress, message });
+            });
+            window.webContents.send('setup-complete');
+            setTimeout(() => {
+              if (window && !window.isDestroyed()) {
+                window.close();
+              }
+              resolve();
+            }, 1500);
+          } catch (retryError) {
+            window.webContents.send('setup-error', retryError.message);
+            reject(retryError);
+          }
+        });
+      }
+    });
+
+    // Handle window close button
+    ipcMain.on('setup-window-close', () => {
+      if (window && !window.isDestroyed()) {
+        window.close();
+      }
+      resolve();
+    });
+  });
 }
 
 // Create Dock menu (macOS fallback)
@@ -876,11 +1001,65 @@ app.whenReady().then(async () => {
     }
   }
 
+  // Clean up old temporary files (older than 1 hour)
+  try {
+    const tempDir = path.join(app.getPath('userData'), 'temp');
+    if (fs.existsSync(tempDir)) {
+      const files = fs.readdirSync(tempDir);
+      const oneHourAgo = Date.now() - (60 * 60 * 1000);
+      let cleanedCount = 0;
+
+      for (const file of files) {
+        const filePath = path.join(tempDir, file);
+        const stats = fs.statSync(filePath);
+        if (stats.mtimeMs < oneHourAgo) {
+          fs.unlinkSync(filePath);
+          cleanedCount++;
+        }
+      }
+
+      if (cleanedCount > 0) {
+        console.log(`✓ Cleaned up ${cleanedCount} old temporary file(s)`);
+      }
+    }
+  } catch (err) {
+    console.warn('⚠️  Failed to clean up temporary files:', err.message);
+  }
+
   // Initialize modules
+  pythonManager = new PythonManager();
   modelManager = new ModelManager();
   inferenceEngine = new InferenceEngine();
   audioRecorder = new AudioRecorder();
   soundManager = new SoundManager();
+
+  // Link Python manager to inference engine
+  inferenceEngine.setPythonManager(pythonManager);
+
+  // Initialize Python environment (will show setup window if needed)
+  await ensurePythonDependencies();
+
+  // Auto-load previously active model if exists
+  const activeModelPath = store.get('activeModel', null);
+  if (activeModelPath && fs.existsSync(activeModelPath)) {
+    console.log('🔄 Auto-loading previously active model:', activeModelPath);
+    try {
+      const result = await inferenceEngine.loadModel(activeModelPath);
+      if (result.success) {
+        console.log('✅ Model loaded successfully:', activeModelPath);
+      } else {
+        console.error('❌ Failed to load model:', result.error);
+        // Clear the active model setting if loading fails
+        store.delete('activeModel');
+      }
+    } catch (error) {
+      console.error('❌ Error loading model:', error);
+      store.delete('activeModel');
+    }
+  } else if (activeModelPath) {
+    console.log('⚠️  Previously active model not found, clearing setting');
+    store.delete('activeModel');
+  }
 
   createTray();
   createMainWindow();
@@ -889,9 +1068,6 @@ app.whenReady().then(async () => {
 
   // Check accessibility permissions for auto-paste
   await checkAccessibilityPermissions();
-
-  // Check and install Python dependencies for Parakeet if needed
-  await ensurePythonDependencies();
 
   // Show welcome message on first run OR dev mode
   const hasRun = store.get('hasRun');
@@ -932,15 +1108,6 @@ app.whenReady().then(async () => {
     console.log('✓ freesper is running');
     console.log('✓ Hotkey: Cmd+Shift+Space');
     console.log('✓ Right-click Dock icon for menu');
-  }
-
-  // Auto-load default model if available
-  const defaultModel = store.get('defaultModel');
-  if (defaultModel) {
-    const modelInfo = modelManager.modelExists(defaultModel);
-    if (modelInfo.exists) {
-      await inferenceEngine.loadModel(modelInfo.path);
-    }
   }
 });
 

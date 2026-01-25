@@ -6,6 +6,13 @@ const wav = require('wav');
 const { spawn } = require('child_process');
 const Tokenizer = require('./tokenizer');
 
+// Get FFmpeg path - handle asar unpacked for production
+let ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+if (app.isPackaged && ffmpegPath.includes('app.asar')) {
+  // In production, ffmpeg is in app.asar.unpacked
+  ffmpegPath = ffmpegPath.replace('app.asar', 'app.asar.unpacked');
+}
+
 /**
  * Get the path to a script file, handling both dev and production modes
  * @param {string} scriptName - Name of the script file (e.g., 'transcribe_sherpa_vad.py')
@@ -35,11 +42,11 @@ class InferenceEngine {
     this.encoderSession = null;
     this.decoderSession = null;
     this.decoderWithPastSession = null;
-    
+
     // Transducer properties (Parakeet architecture)
     this.joinerSession = null;
     this.tokens = null;  // Token list for transducer models
-    
+
     this.modelDir = null;
     this.architecture = null;
 
@@ -47,6 +54,33 @@ class InferenceEngine {
     this.modelConfig = null;
     this.tokenizer = null;
     this.isLoaded = false;
+
+    // Python manager (set by main.js)
+    this.pythonManager = null;
+  }
+
+  /**
+   * Set Python manager instance
+   * @param {PythonManager} pythonManager
+   */
+  setPythonManager(pythonManager) {
+    this.pythonManager = pythonManager;
+  }
+
+  /**
+   * Get Python executable path
+   * @returns {string} Python executable path
+   */
+  getPythonExecutable() {
+    if (this.pythonManager) {
+      const pythonPath = this.pythonManager.getPythonExecutable();
+      if (pythonPath) {
+        return pythonPath;
+      }
+    }
+
+    // Fallback to system python3 (dev mode or if pythonManager not set)
+    return 'python3';
   }
 
   async loadModel(modelPathOrDir) {
@@ -340,9 +374,10 @@ class InferenceEngine {
 
       console.log(`  Input: ${inputPath}`);
       console.log(`  Output: ${outputPath}`);
+      console.log(`  FFmpeg path: ${ffmpegPath}`);
 
       // FFmpeg command to convert to 16kHz mono WAV
-      const ffmpeg = spawn('ffmpeg', [
+      const ffmpeg = spawn(ffmpegPath, [
         '-i', inputPath,           // Input file
         '-ar', '16000',            // Sample rate: 16kHz
         '-ac', '1',                // Mono
@@ -360,7 +395,7 @@ class InferenceEngine {
       ffmpeg.on('close', (code) => {
         if (code !== 0) {
           console.error('FFmpeg stderr:', stderr);
-          return reject(new Error(`FFmpeg conversion failed (exit code ${code}). Make sure FFmpeg is installed: brew install ffmpeg`));
+          return reject(new Error(`FFmpeg conversion failed (exit code ${code})`));
         }
 
         // Verify output file exists
@@ -380,7 +415,7 @@ class InferenceEngine {
       });
 
       ffmpeg.on('error', (error) => {
-        reject(new Error(`Failed to start FFmpeg: ${error.message}. Make sure FFmpeg is installed: brew install ffmpeg`));
+        reject(new Error(`Failed to start bundled FFmpeg: ${error.message}`));
       });
     });
   }
@@ -431,24 +466,16 @@ class InferenceEngine {
       console.log('Script path:', this.sherpaScriptPath);
 
       // Determine Python command
-      // In packaged app, try to use system python3 or venv python
+      // In packaged app, use embedded Python from pythonManager
       // In dev mode, use uv run python
       let pythonCmd;
       let args;
-      
+
       if (app.isPackaged) {
-        // In packaged app, use venv Python if available, otherwise system python3
-        const venvDir = path.join(app.getPath('userData'), 'python-venv');
-        const venvPython = path.join(venvDir, 'bin', 'python3');
-        
-        if (fs.existsSync(venvPython)) {
-          pythonCmd = venvPython;
-          console.log('Using venv Python:', pythonCmd);
-        } else {
-          pythonCmd = 'python3';
-          console.log('Using system Python3');
-        }
-        
+        // In packaged app, use embedded Python
+        pythonCmd = this.getPythonExecutable();
+        console.log('Using embedded Python:', pythonCmd);
+
         args = [
           this.sherpaScriptPath,
           audioFilePath,
@@ -471,12 +498,23 @@ class InferenceEngine {
       console.log('Python command:', pythonCmd, args.join(' '));
 
       const subprocess = spawn(pythonCmd, args, {
-        cwd: workingDir,
-        timeout: 60000 // 60 second timeout
+        cwd: workingDir
       });
 
       let stdout = '';
       let stderr = '';
+      let timeoutId = null;
+      let isResolved = false;
+
+      // Manual timeout implementation
+      timeoutId = setTimeout(() => {
+        if (!isResolved) {
+          console.error('⏱️  Python subprocess timeout (60s), killing process');
+          subprocess.kill('SIGKILL');
+          reject(new Error('Transcription timeout (60 seconds)'));
+          isResolved = true;
+        }
+      }, 60000);
 
       subprocess.stdout.on('data', (data) => {
         stdout += data.toString();
@@ -487,16 +525,38 @@ class InferenceEngine {
       });
 
       subprocess.on('error', (error) => {
-        console.error('Failed to start Python subprocess:', error);
-        reject(new Error(`Subprocess error: ${error.message}`));
+        if (timeoutId) clearTimeout(timeoutId);
+        if (!isResolved) {
+          console.error('Failed to start Python subprocess:', error);
+          reject(new Error(`Subprocess error: ${error.message}`));
+          isResolved = true;
+        }
       });
 
       subprocess.on('close', (code) => {
+        if (timeoutId) clearTimeout(timeoutId);
+        if (isResolved) return; // Already handled by timeout
         const overallTime = Date.now() - overallStart;
+        isResolved = true;
 
         if (code !== 0) {
           console.error('Python script failed with code:', code);
           console.error('STDERR:', stderr);
+          console.error('STDOUT:', stdout);
+
+          // Try to parse JSON error from stdout
+          try {
+            const lines = stdout.trim().split('\n');
+            const jsonLine = lines[lines.length - 1];
+            const result = JSON.parse(jsonLine);
+            if (result.error) {
+              reject(new Error(result.error));
+              return;
+            }
+          } catch (e) {
+            // Could not parse JSON, use generic error
+          }
+
           reject(new Error(`Transcription failed (exit code ${code})`));
           return;
         }
@@ -590,27 +650,30 @@ class InferenceEngine {
     // Parakeet expects 128-dim mel filterbank features
     // We'll use a modified Python script for this
     const { spawn } = require('child_process');
-    
+    const { app } = require('electron');
+
     return new Promise((resolve, reject) => {
+      // Security: validate that audioFilePath is within the app's temp directory
+      const tempDir = path.join(app.getPath('userData'), 'temp');
+      const resolvedPath = path.resolve(audioFilePath);
+      const resolvedTempDir = path.resolve(tempDir);
+
+      if (!resolvedPath.startsWith(resolvedTempDir)) {
+        return reject(new Error('Security: audio file path outside temp directory'));
+      }
+
+      if (!fs.existsSync(audioFilePath)) {
+        return reject(new Error(`Audio file not found: ${audioFilePath}`));
+      }
+
       const scriptPath = getScriptPath('extract_features.py');
-      
+
       if (!fs.existsSync(scriptPath)) {
         return reject(new Error(`Feature extraction script not found: ${scriptPath}`));
       }
 
-      // Try to get venv Python, fallback to system python3
-      let pythonExecutable = 'python3';
-      try {
-        if (typeof app !== 'undefined') {
-          const venvDir = path.join(app.getPath('userData'), 'python-venv');
-          const venvPython = path.join(venvDir, 'bin', 'python3');
-          if (fs.existsSync(venvPython)) {
-            pythonExecutable = venvPython;
-          }
-        }
-      } catch (e) {
-        // app not available (e.g. in Node.js test), use system python3
-      }
+      // Get Python executable from manager (or fallback to system python3)
+      const pythonExecutable = this.getPythonExecutable();
 
       // Pass --n_mels 128 for Parakeet
       const python = spawn(pythonExecutable, [scriptPath, audioFilePath, '--n_mels', '128']);
@@ -1238,19 +1301,8 @@ class InferenceEngine {
       console.log('Extracting features from:', audioFilePath);
       const startTime = Date.now();
 
-      // Use venv Python if available, fallback to system python3
-      let pythonExecutable = 'python3';
-      try {
-        if (typeof app !== 'undefined') {
-          const venvDir = path.join(app.getPath('userData'), 'python-venv');
-          const venvPython = path.join(venvDir, 'bin', 'python3');
-          if (fs.existsSync(venvPython)) {
-            pythonExecutable = venvPython;
-          }
-        }
-      } catch (e) {
-        // app not available (e.g. in Node.js test), use system python3
-      }
+      // Get Python executable from manager (or fallback to system python3)
+      const pythonExecutable = this.getPythonExecutable();
 
       const python = spawn(pythonExecutable, [scriptPath, audioFilePath]);
       let stdout = '';

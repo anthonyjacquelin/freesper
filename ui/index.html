@@ -8,8 +8,13 @@
 </head>
 <body>
   <div id="app">
-    <!-- Navigation Tabs -->
+    <!-- Navigation Tabs with Window Controls -->
     <div class="nav-tabs">
+      <div class="window-controls">
+        <button class="window-button close" id="close-button" title="Fermer"></button>
+        <button class="window-button minimize" id="minimize-button" title="Réduire"></button>
+        <button class="window-button maximize" id="maximize-button" title="Agrandir"></button>
+      </div>
       <button class="nav-tab active" data-view="model-manager">Modèles</button>
       <button class="nav-tab" data-view="history">Historique</button>
       <button class="nav-tab" data-view="settings">Paramètres</button>
