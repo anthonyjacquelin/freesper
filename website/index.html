@@ -148,8 +148,9 @@
       })(document, window.posthog || []);
       posthog.init("phc_eIBrLIPpucoIdjhZrwZ5vjhRmC5cW672YQS36t3bPvx", {
         api_host: "https://eu.i.posthog.com",
-        defaults: "2025-11-30",
-        person_profiles: "always", // or 'always' to create profiles for anonymous users as well
+        person_profiles: "identified_only", // Create profiles only for identified users
+        capture_pageview: true,
+        capture_pageleave: true
       });
     </script>
     <style>
