@@ -1,1100 +1,1334 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- SEO Meta Tags -->
-  <title>Freesper - Free Offline Speech-to-Text for Mac | SuperWhisper Alternative</title>
-  <meta name="description" content="Free, privacy-first speech-to-text app for Mac. 100% offline dictation with no cloud, no subscriptions, no data collection. Fast transcription optimized for Apple Silicon. Free alternative to SuperWhisper.">
-  <meta name="keywords" content="free mac dictation, offline speech to text mac, private voice typing, superwhisper alternative, free speech recognition macos, apple silicon dictation, local transcription">
-  <link rel="canonical" href="https://freesper.com/">
+    <!-- SEO Meta Tags -->
+    <title>
+      Freesper - Free Offline Speech-to-Text for Mac | SuperWhisper Alternative
+    </title>
+    <meta
+      name="description"
+      content="Free, privacy-first speech-to-text app for Mac. 100% offline dictation with no cloud, no subscriptions, no data collection. Fast transcription optimized for Apple Silicon. Free alternative to SuperWhisper."
+    />
+    <meta
+      name="keywords"
+      content="free mac dictation, offline speech to text mac, private voice typing, superwhisper alternative, free speech recognition macos, apple silicon dictation, local transcription"
+    />
+    <link rel="canonical" href="https://freesper.com/" />
 
-  <!-- Open Graph Tags for Social Sharing -->
-  <meta property="og:title" content="Freesper - Free Alternative to SuperWhisper">
-  <meta property="og:description" content="Privacy-first dictation that runs 100% offline. No cloud, no subscriptions, no data collection. Free and open source alternative to SuperWhisper.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://freesper.com/">
-  <meta property="og:image" content="https://freesper.com/og-image.png">
-  <meta property="og:site_name" content="Freesper">
-  <meta property="og:locale" content="en_US">
+    <!-- Open Graph Tags for Social Sharing -->
+    <meta
+      property="og:title"
+      content="Freesper - Free Alternative to SuperWhisper"
+    />
+    <meta
+      property="og:description"
+      content="Privacy-first dictation that runs 100% offline. No cloud, no subscriptions, no data collection. Free and open source alternative to SuperWhisper."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://freesper.com/" />
+    <meta property="og:image" content="https://freesper.com/og-image.png" />
+    <meta property="og:site_name" content="Freesper" />
+    <meta property="og:locale" content="en_US" />
 
-  <!-- Twitter Card Tags -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Freesper - Free Alternative to SuperWhisper">
-  <meta name="twitter:description" content="Privacy-first dictation that runs 100% offline. No cloud, no subscriptions. Free open source alternative to SuperWhisper.">
-  <meta name="twitter:image" content="https://freesper.com/og-image.png">
+    <!-- Twitter Card Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Freesper - Free Alternative to SuperWhisper"
+    />
+    <meta
+      name="twitter:description"
+      content="Privacy-first dictation that runs 100% offline. No cloud, no subscriptions. Free open source alternative to SuperWhisper."
+    />
+    <meta name="twitter:image" content="https://freesper.com/og-image.png" />
 
-  <!-- Fonts with display=swap for performance -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Fonts with display=swap for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Structured Data (Schema.org) -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "Freesper",
-    "operatingSystem": "macOS 13.3+",
-    "applicationCategory": "UtilitiesApplication",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "description": "Free, privacy-first speech-to-text application for macOS. 100% offline processing with no cloud services, no data collection, and no subscriptions required.",
-    "downloadUrl": "http://freesper.nolyth-consulting.com/freesper/freesper-1.0.0-arm64.dmg",
-    "softwareVersion": "1.0.0",
-    "datePublished": "2024-01-23",
-    "license": "https://opensource.org/licenses/MIT",
-    "author": {
-      "@type": "Organization",
-      "name": "Freesper"
-    },
-    "softwareRequirements": "macOS 13.3 or later, Apple Silicon (M1/M2/M3)",
-    "featureList": [
-      "100% offline processing",
-      "System-wide dictation with global hotkey",
-      "Metal acceleration for Apple Silicon",
-      "Support for 100+ languages",
-      "Auto-paste functionality",
-      "Privacy-focused - no data collection",
-      "Free and open source"
-    ],
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "5.0",
-      "ratingCount": "1",
-      "bestRating": "5"
-    }
-  }
-  </script>
-  <style>
-    /* Technical Luxury - Freesper Landing Page */
-    :root {
-      --bg-void: #000000;
-      --bg-deep: #0a0a0a;
-      --bg-surface: #141414;
-      --bg-elevated: #1a1a1a;
-      --border-subtle: #202020;
-      --border-medium: #2a2a2a;
-      --border-strong: #404040;
-      --text-primary: #ffffff;
-      --text-secondary: #b0b0b0;
-      --text-tertiary: #606060;
-      --accent: #ffffff;
-      --glow: rgba(255, 255, 255, 0.1);
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
-    body {
-      font-family: 'Archivo', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg-void);
-      color: var(--text-primary);
-      line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* Animated Background Grid */
-    body::before {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image:
-        linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px),
-        linear-gradient(0deg, var(--border-subtle) 1px, transparent 1px);
-      background-size: 60px 60px;
-      opacity: 0.3;
-      z-index: 0;
-      animation: gridFloat 20s linear infinite;
-    }
-
-    @keyframes gridFloat {
-      0% { transform: translate(0, 0); }
-      100% { transform: translate(60px, 60px); }
-    }
-
-    /* Noise Texture Overlay */
-    body::after {
-      content: '';
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 1;
-      opacity: 0.6;
-    }
-
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 0 48px;
-      position: relative;
-      z-index: 2;
-    }
-
-    /* Hero Section */
-    .hero {
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      padding: 80px 48px;
-      overflow: hidden;
-    }
-
-    /* Audio Spectrum Visualization */
-    .waveform-container {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 100%;
-      max-width: 600px;
-      height: 80px;
-      opacity: 0.18;
-      z-index: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    #waveform-canvas {
-      width: 100%;
-      height: 100%;
-    }
-
-    .hero-content {
-      text-align: center;
-      max-width: 1000px;
-      position: relative;
-      z-index: 1;
-      animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      opacity: 0;
-    }
-
-    @keyframes fadeInUp {
-      to {
-        opacity: 1;
-        transform: translateY(0);
+    <!-- Structured Data (Schema.org) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Freesper",
+        "operatingSystem": "macOS 13.3+",
+        "applicationCategory": "UtilitiesApplication",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "description": "Free, privacy-first speech-to-text application for macOS. 100% offline processing with no cloud services, no data collection, and no subscriptions required.",
+        "downloadUrl": "http://freesper.nolyth-consulting.com/freesper/freesper-1.0.0-arm64.dmg",
+        "softwareVersion": "1.0.0",
+        "datePublished": "2024-01-23",
+        "license": "https://opensource.org/licenses/MIT",
+        "author": {
+          "@type": "Organization",
+          "name": "Freesper"
+        },
+        "softwareRequirements": "macOS 13.3 or later, Apple Silicon (M1/M2/M3)",
+        "featureList": [
+          "100% offline processing",
+          "System-wide dictation with global hotkey",
+          "Metal acceleration for Apple Silicon",
+          "Support for 100+ languages",
+          "Auto-paste functionality",
+          "Privacy-focused - no data collection",
+          "Free and open source"
+        ],
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "5.0",
+          "ratingCount": "1",
+          "bestRating": "5"
+        }
       }
-      from {
-        opacity: 0;
-        transform: translateY(30px);
+    </script>
+    <script>
+      !(function (t, e) {
+        var o, n, p, r;
+        e.__SV ||
+          (window.posthog && window.posthog.__loaded) ||
+          ((window.posthog = e),
+          (e._i = []),
+          (e.init = function (i, s, a) {
+            function g(t, e) {
+              var o = e.split(".");
+              (2 == o.length && ((t = t[o[0]]), (e = o[1])),
+                (t[e] = function () {
+                  t.push([e].concat(Array.prototype.slice.call(arguments, 0)));
+                }));
+            }
+            (((p = t.createElement("script")).type = "text/javascript"),
+              (p.crossOrigin = "anonymous"),
+              (p.async = !0),
+              (p.src =
+                s.api_host.replace(".i.posthog.com", "-assets.i.posthog.com") +
+                "/static/array.js"),
+              (r = t.getElementsByTagName("script")[0]).parentNode.insertBefore(
+                p,
+                r,
+              ));
+            var u = e;
+            for (
+              void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
+                u.people = u.people || [],
+                u.toString = function (t) {
+                  var e = "posthog";
+                  return (
+                    "posthog" !== a && (e += "." + a),
+                    t || (e += " (stub)"),
+                    e
+                  );
+                },
+                u.people.toString = function () {
+                  return u.toString(1) + ".people (stub)";
+                },
+                o =
+                  "init ss us bi os hs es ns capture Bi calculateEventProperties cs register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureEnabled reloadFeatureFlags updateFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSurveysLoaded onSessionId getSurveys getActiveMatchingSurveys renderSurvey displaySurvey cancelPendingSurvey canRenderSurvey canRenderSurveyAsync identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException startExceptionAutocapture stopExceptionAutocapture loadToolbar get_property getSessionProperty ps vs createPersonProfile gs Zr ys opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing get_explicit_consent_status is_capturing clear_opt_in_out_capturing ds debug O fs getPageViewId captureTraceFeedback captureTraceMetric Yr".split(
+                    " ",
+                  ),
+                n = 0;
+              n < o.length;
+              n++
+            )
+              g(u, o[n]);
+            e._i.push([i, s, a]);
+          }),
+          (e.__SV = 1));
+      })(document, window.posthog || []);
+      posthog.init("phc_eIBrLIPpucoIdjhZrwZ5vjhRmC5cW672YQS36t3bPvx", {
+        api_host: "https://eu.i.posthog.com",
+        defaults: "2025-11-30",
+        person_profiles: "always", // or 'always' to create profiles for anonymous users as well
+      });
+    </script>
+    <style>
+      /* Technical Luxury - Freesper Landing Page */
+      :root {
+        --bg-void: #000000;
+        --bg-deep: #0a0a0a;
+        --bg-surface: #141414;
+        --bg-elevated: #1a1a1a;
+        --border-subtle: #202020;
+        --border-medium: #2a2a2a;
+        --border-strong: #404040;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --text-tertiary: #606060;
+        --accent: #ffffff;
+        --glow: rgba(255, 255, 255, 0.1);
       }
-    }
 
-    .hero-eyebrow {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-      margin-bottom: 32px;
-      animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
-      opacity: 0;
-    }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family:
+          "Archivo",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg-void);
+        color: var(--text-primary);
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      /* Animated Background Grid */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image:
+          linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px),
+          linear-gradient(0deg, var(--border-subtle) 1px, transparent 1px);
+        background-size: 60px 60px;
+        opacity: 0.3;
+        z-index: 0;
+        animation: gridFloat 20s linear infinite;
+      }
+
+      @keyframes gridFloat {
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(60px, 60px);
+        }
+      }
+
+      /* Noise Texture Overlay */
+      body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 1;
+        opacity: 0.6;
+      }
 
-    .hero h1 {
-      font-size: clamp(64px, 12vw, 160px);
-      font-weight: 900;
-      letter-spacing: -0.04em;
-      line-height: 0.9;
-      margin-bottom: 40px;
-      background: linear-gradient(180deg, #ffffff 0%, #808080 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-      opacity: 0;
-      position: relative;
-    }
-
-    .hero h1::after {
-      content: '';
-      position: absolute;
-      bottom: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 120px;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
-      opacity: 0;
-    }
-
-    .hero .tagline {
-      font-size: clamp(20px, 3vw, 36px);
-      font-weight: 300;
-      letter-spacing: -0.01em;
-      color: var(--text-secondary);
-      margin-bottom: 24px;
-      animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
-      opacity: 0;
-    }
-
-    .hero .subtitle {
-      font-size: clamp(16px, 2vw, 20px);
-      color: var(--text-tertiary);
-      margin-bottom: 64px;
-      font-weight: 400;
-      animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
-      opacity: 0;
-    }
-
-    .cta-group {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
-      animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
-      opacity: 0;
-    }
-
-    .cta-buttons {
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    .cta-button {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 16px;
-      font-family: 'Archivo', sans-serif;
-      font-size: 18px;
-      font-weight: 600;
-      padding: 24px 48px;
-      background: var(--text-primary);
-      color: var(--bg-void);
-      text-decoration: none;
-      border: 2px solid var(--text-primary);
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-      overflow: hidden;
-      letter-spacing: -0.01em;
-    }
-
-    .cta-button::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      z-index: 1;
-    }
-
-    .cta-button:hover::after {
-      opacity: 1;
-    }
-
-    .cta-button:hover {
-      background: var(--bg-void);
-      color: var(--text-primary);
-      transform: translateY(-6px) scale(1.02);
-      box-shadow:
-        0 25px 50px rgba(255, 255, 255, 0.15),
-        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
-    }
-
-    .cta-button:active {
-      transform: translateY(-2px) scale(0.98);
-    }
-
-    .cta-button span,
-    .cta-button svg {
-      position: relative;
-      z-index: 2;
-    }
-
-    .cta-button-secondary {
-      background: transparent;
-      color: var(--text-primary);
-      border: 2px solid var(--border-strong);
-    }
-
-    .cta-button-secondary:hover {
-      background: var(--text-primary);
-      color: var(--bg-void);
-      border-color: var(--text-primary);
-      box-shadow:
-        0 25px 50px rgba(255, 255, 255, 0.12),
-        0 0 30px rgba(255, 255, 255, 0.08);
-    }
-
-    .download-icon,
-    .github-svg {
-      width: 22px;
-      height: 22px;
-      fill: currentColor;
-      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
-    }
-
-    .cta-button:hover .download-icon {
-      transform: translateY(3px);
-      opacity: 0.9;
-    }
-
-    .cta-button:hover .github-svg {
-      transform: scale(1.05);
-      opacity: 0.9;
-    }
-
-    .system-badge {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      padding: 12px 24px;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-medium);
-      color: var(--text-tertiary);
-      letter-spacing: 0.05em;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .system-badge::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-      animation: shimmer 3s infinite;
-    }
-
-    @keyframes shimmer {
-      100% { left: 100%; }
-    }
-
-    /* Scroll Indicator */
-    .scroll-indicator {
-      position: absolute;
-      bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      color: var(--text-tertiary);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
-      opacity: 0;
-    }
-
-    .scroll-line {
-      width: 1px;
-      height: 40px;
-      background: linear-gradient(180deg, var(--border-medium), transparent);
-      animation: scrollPulse 2s ease-in-out infinite;
-    }
-
-    @keyframes scrollPulse {
-      0%, 100% { opacity: 0.3; transform: scaleY(1); }
-      50% { opacity: 1; transform: scaleY(1.5); }
-    }
-
-    /* Features Section */
-    .features {
-      padding: 200px 48px;
-      position: relative;
-    }
-
-    .section-header {
-      text-align: center;
-      margin-bottom: 120px;
-    }
-
-    .section-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--text-tertiary);
-      margin-bottom: 24px;
-    }
-
-    .section-title {
-      font-size: clamp(48px, 8vw, 96px);
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      line-height: 1;
-      background: linear-gradient(180deg, #ffffff 0%, #606060 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-      gap: 2px;
-      background: var(--border-subtle);
-      border: 1px solid var(--border-subtle);
-    }
-
-    .feature-card {
-      background: var(--bg-deep);
-      padding: 48px;
-      position: relative;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-      overflow: hidden;
-    }
-
-    .feature-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      transform: translateX(-100%);
-      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .feature-card:hover::before {
-      transform: translateX(100%);
-    }
-
-    .feature-card:hover {
-      background: var(--bg-surface);
-      transform: translateY(-8px);
-    }
-
-    .feature-number {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-tertiary);
-      margin-bottom: 32px;
-      letter-spacing: 0.1em;
-    }
-
-    .feature-icon {
-      font-size: 56px;
-      margin-bottom: 32px;
-      display: block;
-      filter: grayscale(100%);
-      opacity: 0.9;
-      transition: all 0.4s ease;
-    }
-
-    .feature-card:hover .feature-icon {
-      filter: grayscale(0%);
-      opacity: 1;
-      transform: scale(1.1);
-    }
-
-    .feature-card h3 {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 16px;
-      letter-spacing: -0.02em;
-      color: var(--text-primary);
-    }
-
-    .feature-card p {
-      font-size: 16px;
-      color: var(--text-secondary);
-      line-height: 1.7;
-      font-weight: 400;
-    }
-
-    /* Privacy Section */
-    .privacy {
-      padding: 200px 48px;
-      position: relative;
-      text-align: center;
-    }
-
-    .privacy-content {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .privacy h2 {
-      font-size: clamp(48px, 8vw, 96px);
-      font-weight: 900;
-      letter-spacing: -0.03em;
-      line-height: 1.1;
-      margin-bottom: 40px;
-      background: linear-gradient(180deg, #ffffff 0%, #606060 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .privacy p {
-      font-size: 20px;
-      color: var(--text-secondary);
-      line-height: 1.8;
-      margin-bottom: 64px;
-      font-weight: 300;
-    }
-
-    .privacy-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 20px;
-      background: var(--bg-surface);
-      border: 2px solid var(--border-medium);
-      padding: 32px 48px;
-      font-size: 20px;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .privacy-badge::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, transparent 30%, rgba(255, 255, 255, 0.03) 50%, transparent 70%);
-      transform: translateX(-100%);
-      transition: transform 0.6s ease;
-    }
-
-    .privacy-badge:hover::before {
-      transform: translateX(100%);
-    }
-
-    .privacy-badge:hover {
-      border-color: var(--border-strong);
-      transform: translateY(-4px);
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-    }
-
-    .privacy-icon {
-      font-size: 40px;
-    }
-
-    /* Tech Specs Section */
-    .tech-specs {
-      padding: 200px 48px;
-      position: relative;
-    }
-
-    .specs-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 48px;
-      margin-top: 80px;
-    }
-
-    .spec-item {
-      text-align: center;
-      padding: 40px 24px;
-      border: 1px solid var(--border-subtle);
-      background: var(--bg-deep);
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .spec-item::after {
-      content: '';
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: var(--accent);
-      transform: scaleX(0);
-      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .spec-item:hover::after {
-      transform: scaleX(1);
-    }
-
-    .spec-item:hover {
-      border-color: var(--border-medium);
-      transform: translateY(-4px);
-    }
-
-    .spec-value {
-      font-size: 48px;
-      font-weight: 900;
-      margin-bottom: 12px;
-      background: linear-gradient(180deg, #ffffff 0%, #808080 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .spec-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-tertiary);
-    }
-
-    /* Footer */
-    footer {
-      padding: 80px 48px;
-      border-top: 1px solid var(--border-subtle);
-      position: relative;
-    }
-
-    .footer-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 32px;
-    }
-
-    .footer-brand {
-      font-size: 24px;
-      font-weight: 900;
-      letter-spacing: -0.02em;
-    }
-
-    .footer-links {
-      display: flex;
-      gap: 32px;
-      align-items: center;
-    }
-
-    .github-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-secondary);
-      text-decoration: none;
-      padding: 10px 20px;
-      border: 1px solid var(--border-subtle);
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-    }
-
-    .github-link:hover {
-      color: var(--text-primary);
-      border-color: var(--border-strong);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
-    }
-
-    .github-link svg {
-      width: 16px;
-      height: 16px;
-      fill: currentColor;
-      transition: transform 0.3s ease;
-    }
-
-    .github-link:hover svg {
-      transform: scale(1.1);
-    }
-
-    .footer-info {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--text-tertiary);
-      letter-spacing: 0.05em;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
       .container {
-        padding: 0 24px;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 48px;
+        position: relative;
+        z-index: 2;
       }
 
+      /* Hero Section */
       .hero {
-        padding: 60px 24px;
-      }
-
-      .cta-buttons {
+        min-height: 100vh;
+        display: flex;
         flex-direction: column;
-        width: 100%;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        padding: 80px 48px;
+        overflow: hidden;
       }
 
-      .cta-button {
+      /* Audio Spectrum Visualization */
+      .waveform-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         width: 100%;
+        max-width: 600px;
+        height: 80px;
+        opacity: 0.18;
+        z-index: 0;
+        display: flex;
+        align-items: center;
         justify-content: center;
       }
 
-      .features,
-      .privacy,
-      .tech-specs {
-        padding: 100px 24px;
+      #waveform-canvas {
+        width: 100%;
+        height: 100%;
+      }
+
+      .hero-content {
+        text-align: center;
+        max-width: 1000px;
+        position: relative;
+        z-index: 1;
+        animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+      }
+
+      @keyframes fadeInUp {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        from {
+          opacity: 0;
+          transform: translateY(30px);
+        }
+      }
+
+      .hero-eyebrow {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        margin-bottom: 32px;
+        animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+        opacity: 0;
+      }
+
+      .hero h1 {
+        font-size: clamp(64px, 12vw, 160px);
+        font-weight: 900;
+        letter-spacing: -0.04em;
+        line-height: 0.9;
+        margin-bottom: 40px;
+        background: linear-gradient(180deg, #ffffff 0%, #808080 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+        opacity: 0;
+        position: relative;
+      }
+
+      .hero h1::after {
+        content: "";
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--accent),
+          transparent
+        );
+        animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards;
+        opacity: 0;
+      }
+
+      .hero .tagline {
+        font-size: clamp(20px, 3vw, 36px);
+        font-weight: 300;
+        letter-spacing: -0.01em;
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+        animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.4s forwards;
+        opacity: 0;
+      }
+
+      .hero .subtitle {
+        font-size: clamp(16px, 2vw, 20px);
+        color: var(--text-tertiary);
+        margin-bottom: 64px;
+        font-weight: 400;
+        animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s forwards;
+        opacity: 0;
+      }
+
+      .cta-group {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+        opacity: 0;
+      }
+
+      .cta-buttons {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .cta-button {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+        font-family: "Archivo", sans-serif;
+        font-size: 18px;
+        font-weight: 600;
+        padding: 24px 48px;
+        background: var(--text-primary);
+        color: var(--bg-void);
+        text-decoration: none;
+        border: 2px solid var(--text-primary);
+        transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden;
+        letter-spacing: -0.01em;
+      }
+
+      .cta-button::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.08) 0%,
+          transparent 50%
+        );
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 1;
+      }
+
+      .cta-button:hover::after {
+        opacity: 1;
+      }
+
+      .cta-button:hover {
+        background: var(--bg-void);
+        color: var(--text-primary);
+        transform: translateY(-6px) scale(1.02);
+        box-shadow:
+          0 25px 50px rgba(255, 255, 255, 0.15),
+          0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      }
+
+      .cta-button:active {
+        transform: translateY(-2px) scale(0.98);
+      }
+
+      .cta-button span,
+      .cta-button svg {
+        position: relative;
+        z-index: 2;
+      }
+
+      .cta-button-secondary {
+        background: transparent;
+        color: var(--text-primary);
+        border: 2px solid var(--border-strong);
+      }
+
+      .cta-button-secondary:hover {
+        background: var(--text-primary);
+        color: var(--bg-void);
+        border-color: var(--text-primary);
+        box-shadow:
+          0 25px 50px rgba(255, 255, 255, 0.12),
+          0 0 30px rgba(255, 255, 255, 0.08);
+      }
+
+      .download-icon,
+      .github-svg {
+        width: 22px;
+        height: 22px;
+        fill: currentColor;
+        transition:
+          transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+          opacity 0.3s ease;
+      }
+
+      .cta-button:hover .download-icon {
+        transform: translateY(3px);
+        opacity: 0.9;
+      }
+
+      .cta-button:hover .github-svg {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+
+      .system-badge {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        padding: 12px 24px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-medium);
+        color: var(--text-tertiary);
+        letter-spacing: 0.05em;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .system-badge::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.05),
+          transparent
+        );
+        animation: shimmer 3s infinite;
+      }
+
+      @keyframes shimmer {
+        100% {
+          left: 100%;
+        }
+      }
+
+      /* Scroll Indicator */
+      .scroll-indicator {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        color: var(--text-tertiary);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.8s forwards;
+        opacity: 0;
+      }
+
+      .scroll-line {
+        width: 1px;
+        height: 40px;
+        background: linear-gradient(180deg, var(--border-medium), transparent);
+        animation: scrollPulse 2s ease-in-out infinite;
+      }
+
+      @keyframes scrollPulse {
+        0%,
+        100% {
+          opacity: 0.3;
+          transform: scaleY(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scaleY(1.5);
+        }
+      }
+
+      /* Features Section */
+      .features {
+        padding: 200px 48px;
+        position: relative;
+      }
+
+      .section-header {
+        text-align: center;
+        margin-bottom: 120px;
+      }
+
+      .section-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: var(--text-tertiary);
+        margin-bottom: 24px;
+      }
+
+      .section-title {
+        font-size: clamp(48px, 8vw, 96px);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        background: linear-gradient(180deg, #ffffff 0%, #606060 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .features-grid {
-        grid-template-columns: 1fr;
-        gap: 1px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2px;
+        background: var(--border-subtle);
+        border: 1px solid var(--border-subtle);
       }
 
-      .specs-grid {
-        grid-template-columns: 1fr;
-        gap: 24px;
+      .feature-card {
+        background: var(--bg-deep);
+        padding: 48px;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow: hidden;
       }
 
-      .footer-content {
-        flex-direction: column;
+      .feature-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          var(--accent),
+          transparent
+        );
+        transform: translateX(-100%);
+        transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .feature-card:hover::before {
+        transform: translateX(100%);
+      }
+
+      .feature-card:hover {
+        background: var(--bg-surface);
+        transform: translateY(-8px);
+      }
+
+      .feature-number {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--text-tertiary);
+        margin-bottom: 32px;
+        letter-spacing: 0.1em;
+      }
+
+      .feature-icon {
+        font-size: 56px;
+        margin-bottom: 32px;
+        display: block;
+        filter: grayscale(100%);
+        opacity: 0.9;
+        transition: all 0.4s ease;
+      }
+
+      .feature-card:hover .feature-icon {
+        filter: grayscale(0%);
+        opacity: 1;
+        transform: scale(1.1);
+      }
+
+      .feature-card h3 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        letter-spacing: -0.02em;
+        color: var(--text-primary);
+      }
+
+      .feature-card p {
+        font-size: 16px;
+        color: var(--text-secondary);
+        line-height: 1.7;
+        font-weight: 400;
+      }
+
+      /* Privacy Section */
+      .privacy {
+        padding: 200px 48px;
+        position: relative;
         text-align: center;
       }
 
+      .privacy-content {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .privacy h2 {
+        font-size: clamp(48px, 8vw, 96px);
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        margin-bottom: 40px;
+        background: linear-gradient(180deg, #ffffff 0%, #606060 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .privacy p {
+        font-size: 20px;
+        color: var(--text-secondary);
+        line-height: 1.8;
+        margin-bottom: 64px;
+        font-weight: 300;
+      }
+
+      .privacy-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 20px;
+        background: var(--bg-surface);
+        border: 2px solid var(--border-medium);
+        padding: 32px 48px;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .privacy-badge::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0.03) 50%,
+          transparent 70%
+        );
+        transform: translateX(-100%);
+        transition: transform 0.6s ease;
+      }
+
+      .privacy-badge:hover::before {
+        transform: translateX(100%);
+      }
+
+      .privacy-badge:hover {
+        border-color: var(--border-strong);
+        transform: translateY(-4px);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .privacy-icon {
+        font-size: 40px;
+      }
+
+      /* Tech Specs Section */
+      .tech-specs {
+        padding: 200px 48px;
+        position: relative;
+      }
+
+      .specs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 48px;
+        margin-top: 80px;
+      }
+
+      .spec-item {
+        text-align: center;
+        padding: 40px 24px;
+        border: 1px solid var(--border-subtle);
+        background: var(--bg-deep);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .spec-item::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--accent);
+        transform: scaleX(0);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .spec-item:hover::after {
+        transform: scaleX(1);
+      }
+
+      .spec-item:hover {
+        border-color: var(--border-medium);
+        transform: translateY(-4px);
+      }
+
+      .spec-value {
+        font-size: 48px;
+        font-weight: 900;
+        margin-bottom: 12px;
+        background: linear-gradient(180deg, #ffffff 0%, #808080 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      .spec-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-tertiary);
+      }
+
+      /* Footer */
+      footer {
+        padding: 80px 48px;
+        border-top: 1px solid var(--border-subtle);
+        position: relative;
+      }
+
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 32px;
+      }
+
+      .footer-brand {
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: -0.02em;
+      }
+
       .footer-links {
-        flex-direction: column;
-        gap: 16px;
+        display: flex;
+        gap: 32px;
+        align-items: center;
       }
 
-      .waveform-container {
-        height: 60px;
-        max-width: 400px;
+      .github-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        padding: 10px 20px;
+        border: 1px solid var(--border-subtle);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
       }
-    }
 
-    /* Reveal on Scroll Animation */
-    .reveal {
-      opacity: 0;
-      transform: translateY(40px);
-      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    }
+      .github-link:hover {
+        color: var(--text-primary);
+        border-color: var(--border-strong);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+      }
 
-    .reveal.active {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  </style>
-</head>
-<body>
-  <!-- Hero Section -->
-  <section class="hero">
-    <!-- Audio Spectrum Visualization -->
-    <div class="waveform-container">
-      <canvas id="waveform-canvas"></canvas>
-    </div>
+      .github-link svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+        transition: transform 0.3s ease;
+      }
 
-    <div class="hero-content">
-      <div class="hero-eyebrow">FREE · Privacy First · No Subscriptions</div>
-      <h1>freesper</h1>
-      <p class="tagline">Free Offline Speech-to-Text for Mac</p>
-      <p class="subtitle">Fast, private dictation that runs 100% on your device. No cloud, no data collection. Free open source alternative to SuperWhisper.</p>
+      .github-link:hover svg {
+        transform: scale(1.1);
+      }
 
-      <div class="cta-group">
-        <div class="cta-buttons">
-          <a href="http://freesper.nolyth-consulting.com/freesper/freesper-1.0.0-arm64.dmg" class="cta-button" download>
-            <svg class="download-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
-              <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-            </svg>
-            <span>Download Free for macOS</span>
-          </a>
-          <a href="https://github.com/anthonyjacquelin/freesper" target="_blank" rel="noopener noreferrer" class="cta-button cta-button-secondary">
-            <svg class="github-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-            <span>Star on GitHub</span>
-          </a>
-        </div>
-        <div class="system-badge">FREE Forever · macOS 13.3+ · Apple Silicon (M1/M2/M3)</div>
-      </div>
-    </div>
+      .footer-info {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        color: var(--text-tertiary);
+        letter-spacing: 0.05em;
+      }
 
-    <div class="scroll-indicator">
-      <span>Scroll</span>
-      <div class="scroll-line"></div>
-    </div>
-  </section>
+      /* Responsive */
+      @media (max-width: 768px) {
+        .container {
+          padding: 0 24px;
+        }
 
-  <!-- Features Section -->
-  <section class="features">
-    <div class="container">
-      <div class="section-header reveal">
-        <div class="section-label">Capabilities</div>
-        <h2 class="section-title">Built for Power Users</h2>
-      </div>
+        .hero {
+          padding: 60px 24px;
+        }
 
-      <div class="features-grid reveal">
-        <div class="feature-card">
-          <div class="feature-number">01</div>
-          <span class="feature-icon">🎤</span>
-          <h3>System-Wide Dictation</h3>
-          <p>Record audio from any app with a customizable global hotkey. Instant access wherever you are.</p>
-        </div>
+        .cta-buttons {
+          flex-direction: column;
+          width: 100%;
+        }
 
-        <div class="feature-card">
-          <div class="feature-number">02</div>
-          <span class="feature-icon">🔒</span>
-          <h3>100% Offline</h3>
-          <p>All processing happens locally on your device. Your voice never leaves your Mac.</p>
-        </div>
+        .cta-button {
+          width: 100%;
+          justify-content: center;
+        }
 
-        <div class="feature-card">
-          <div class="feature-number">03</div>
-          <span class="feature-icon">⚡</span>
-          <h3>Metal Acceleration</h3>
-          <p>Optimized for Apple Silicon with CoreML and Metal. Lightning-fast transcription performance.</p>
-        </div>
+        .features,
+        .privacy,
+        .tech-specs {
+          padding: 100px 24px;
+        }
 
-        <div class="feature-card">
-          <div class="feature-number">04</div>
-          <span class="feature-icon">🌍</span>
-          <h3>Multi-Language</h3>
-          <p>Supports 100+ languages via Parakeet and Whisper models with intelligent auto-detection.</p>
-        </div>
+        .features-grid {
+          grid-template-columns: 1fr;
+          gap: 1px;
+        }
 
-        <div class="feature-card">
-          <div class="feature-number">05</div>
-          <span class="feature-icon">⌨️</span>
-          <h3>Auto-Paste</h3>
-          <p>Automatically paste transcriptions anywhere with smart clipboard integration and context awareness.</p>
-        </div>
+        .specs-grid {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
 
-        <div class="feature-card">
-          <div class="feature-number">06</div>
-          <span class="feature-icon">🎯</span>
-          <h3>Menu Bar App</h3>
-          <p>Lightweight and always accessible from your menu bar. Zero distractions, maximum productivity.</p>
-        </div>
-      </div>
-    </div>
-  </section>
+        .footer-content {
+          flex-direction: column;
+          text-align: center;
+        }
 
-  <!-- Tech Specs -->
-  <section class="tech-specs">
-    <div class="container">
-      <div class="section-header reveal">
-        <div class="section-label">Performance</div>
-        <h2 class="section-title">Engineered for Speed</h2>
+        .footer-links {
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .waveform-container {
+          height: 60px;
+          max-width: 400px;
+        }
+      }
+
+      /* Reveal on Scroll Animation */
+      .reveal {
+        opacity: 0;
+        transform: translateY(40px);
+        transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .reveal.active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hero Section -->
+    <section class="hero">
+      <!-- Audio Spectrum Visualization -->
+      <div class="waveform-container">
+        <canvas id="waveform-canvas"></canvas>
       </div>
 
-      <div class="specs-grid reveal">
-        <div class="spec-item">
-          <div class="spec-value">0.08×</div>
-          <div class="spec-label">Real-Time Factor</div>
-        </div>
-
-        <div class="spec-item">
-          <div class="spec-value">100+</div>
-          <div class="spec-label">Languages</div>
-        </div>
-
-        <div class="spec-item">
-          <div class="spec-value">0ms</div>
-          <div class="spec-label">Cloud Latency</div>
-        </div>
-
-        <div class="spec-item">
-          <div class="spec-value">100%</div>
-          <div class="spec-label">Privacy</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Comparison Section -->
-  <section class="tech-specs">
-    <div class="container">
-      <div class="section-header reveal">
-        <div class="section-label">Why Choose Freesper</div>
-        <h2 class="section-title">Free Alternative to SuperWhisper</h2>
-      </div>
-
-      <div class="specs-grid reveal">
-        <div class="spec-item">
-          <div class="spec-value">$0</div>
-          <div class="spec-label">No Subscriptions Ever</div>
-        </div>
-
-        <div class="spec-item">
-          <div class="spec-value">100%</div>
-          <div class="spec-label">Offline Processing</div>
-        </div>
-
-        <div class="spec-item">
-          <div class="spec-value">Open</div>
-          <div class="spec-label">Source & MIT Licensed</div>
-        </div>
-
-        <div class="spec-item">
-          <div class="spec-value">Zero</div>
-          <div class="spec-label">Data Collection</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Privacy Section -->
-  <section class="privacy">
-    <div class="container">
-      <div class="privacy-content reveal">
-        <h2>Built with Privacy in Mind</h2>
-        <p>
-          No cloud services. No data collection. No API keys required. No subscriptions.
-          Everything runs locally using state-of-the-art ML models optimized specifically for your Mac.
+      <div class="hero-content">
+        <div class="hero-eyebrow">FREE · Privacy First · No Subscriptions</div>
+        <h1>freesper</h1>
+        <p class="tagline">Free Offline Speech-to-Text for Mac</p>
+        <p class="subtitle">
+          Fast, private dictation that runs 100% on your device. No cloud, no
+          data collection. Free open source alternative to SuperWhisper.
         </p>
 
-        <div class="privacy-badge">
-          <span class="privacy-icon">🔐</span>
-          <span>Your voice never leaves your Mac</span>
+        <div class="cta-group">
+          <div class="cta-buttons">
+            <a
+              id="download-button-hero"
+              href="http://freesper.nolyth-consulting.com/freesper/freesper-1.0.0-arm64.dmg"
+              class="cta-button"
+              download
+            >
+              <svg
+                class="download-icon"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+              >
+                <path
+                  d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
+                />
+              </svg>
+              <span>Download Free for macOS</span>
+            </a>
+            <a
+              href="https://github.com/anthonyjacquelin/freesper"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="cta-button cta-button-secondary"
+            >
+              <svg
+                class="github-svg"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                />
+              </svg>
+              <span>Star on GitHub</span>
+            </a>
+          </div>
+          <div class="system-badge">
+            FREE Forever · macOS 13.3+ · Apple Silicon (M1/M2/M3)
+          </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <div class="footer-content">
-        <div class="footer-brand">freesper</div>
-        <div class="footer-links">
-          <a href="https://github.com/anthonyjacquelin/freesper" target="_blank" rel="noopener noreferrer" class="github-link">
-            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-            <span>Open Source</span>
-          </a>
-          <div class="footer-info">v1.0.0 · MIT License · Built for macOS</div>
+      <div class="scroll-indicator">
+        <span>Scroll</span>
+        <div class="scroll-line"></div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="section-label">Capabilities</div>
+          <h2 class="section-title">Built for Power Users</h2>
+        </div>
+
+        <div class="features-grid reveal">
+          <div class="feature-card">
+            <div class="feature-number">01</div>
+            <span class="feature-icon">🎤</span>
+            <h3>System-Wide Dictation</h3>
+            <p>
+              Record audio from any app with a customizable global hotkey.
+              Instant access wherever you are.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-number">02</div>
+            <span class="feature-icon">🔒</span>
+            <h3>100% Offline</h3>
+            <p>
+              All processing happens locally on your device. Your voice never
+              leaves your Mac.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-number">03</div>
+            <span class="feature-icon">⚡</span>
+            <h3>Metal Acceleration</h3>
+            <p>
+              Optimized for Apple Silicon with CoreML and Metal. Lightning-fast
+              transcription performance.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-number">04</div>
+            <span class="feature-icon">🌍</span>
+            <h3>Multi-Language</h3>
+            <p>
+              Supports 100+ languages via Parakeet and Whisper models with
+              intelligent auto-detection.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-number">05</div>
+            <span class="feature-icon">⌨️</span>
+            <h3>Auto-Paste</h3>
+            <p>
+              Automatically paste transcriptions anywhere with smart clipboard
+              integration and context awareness.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-number">06</div>
+            <span class="feature-icon">🎯</span>
+            <h3>Menu Bar App</h3>
+            <p>
+              Lightweight and always accessible from your menu bar. Zero
+              distractions, maximum productivity.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
-  </footer>
+    </section>
 
-  <!-- Scroll Reveal Script -->
-  <script>
-    // Scroll reveal animation
-    const observerOptions = {
-      threshold: 0.1,
-      rootMargin: '0px 0px -100px 0px'
-    };
+    <!-- Tech Specs -->
+    <section class="tech-specs">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="section-label">Performance</div>
+          <h2 class="section-title">Engineered for Speed</h2>
+        </div>
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-        }
+        <div class="specs-grid reveal">
+          <div class="spec-item">
+            <div class="spec-value">0.08×</div>
+            <div class="spec-label">Real-Time Factor</div>
+          </div>
+
+          <div class="spec-item">
+            <div class="spec-value">100+</div>
+            <div class="spec-label">Languages</div>
+          </div>
+
+          <div class="spec-item">
+            <div class="spec-value">0ms</div>
+            <div class="spec-label">Cloud Latency</div>
+          </div>
+
+          <div class="spec-item">
+            <div class="spec-value">100%</div>
+            <div class="spec-label">Privacy</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="tech-specs">
+      <div class="container">
+        <div class="section-header reveal">
+          <div class="section-label">Why Choose Freesper</div>
+          <h2 class="section-title">Free Alternative to SuperWhisper</h2>
+        </div>
+
+        <div class="specs-grid reveal">
+          <div class="spec-item">
+            <div class="spec-value">$0</div>
+            <div class="spec-label">No Subscriptions Ever</div>
+          </div>
+
+          <div class="spec-item">
+            <div class="spec-value">100%</div>
+            <div class="spec-label">Offline Processing</div>
+          </div>
+
+          <div class="spec-item">
+            <div class="spec-value">Open</div>
+            <div class="spec-label">Source & MIT Licensed</div>
+          </div>
+
+          <div class="spec-item">
+            <div class="spec-value">Zero</div>
+            <div class="spec-label">Data Collection</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Privacy Section -->
+    <section class="privacy">
+      <div class="container">
+        <div class="privacy-content reveal">
+          <h2>Built with Privacy in Mind</h2>
+          <p>
+            No cloud services. No data collection. No API keys required. No
+            subscriptions. Everything runs locally using state-of-the-art ML
+            models optimized specifically for your Mac.
+          </p>
+
+          <div class="privacy-badge">
+            <span class="privacy-icon">🔐</span>
+            <span>Your voice never leaves your Mac</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-brand">freesper</div>
+          <div class="footer-links">
+            <a
+              href="https://github.com/anthonyjacquelin/freesper"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="github-link"
+            >
+              <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+                />
+              </svg>
+              <span>Open Source</span>
+            </a>
+            <div class="footer-info">
+              v1.0.0 · MIT License · Built for macOS
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Scroll Reveal Script -->
+    <script>
+      // Scroll reveal animation
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: "0px 0px -100px 0px",
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("active");
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll(".reveal").forEach((element) => {
+        observer.observe(element);
       });
-    }, observerOptions);
+    </script>
 
-    document.querySelectorAll('.reveal').forEach((element) => {
-      observer.observe(element);
-    });
-  </script>
+    <!-- Waveform Animation Script -->
+    <script>
+      const canvas = document.getElementById("waveform-canvas");
+      const ctx = canvas.getContext("2d");
 
-  <!-- Waveform Animation Script -->
-  <script>
-    const canvas = document.getElementById('waveform-canvas');
-    const ctx = canvas.getContext('2d');
+      // Config (same as recording.html)
+      const BAR_WIDTH = 3;
+      const BAR_GAP = 3;
+      const BAR_COUNT = 32; // Number of bars per side
+      const MAX_BAR_HEIGHT = 40;
+      const MIN_BAR_HEIGHT = 3;
 
-    // Config (same as recording.html)
-    const BAR_WIDTH = 3;
-    const BAR_GAP = 3;
-    const BAR_COUNT = 32; // Number of bars per side
-    const MAX_BAR_HEIGHT = 40;
-    const MIN_BAR_HEIGHT = 3;
+      let idleOffset = 0;
+      let speechOffset = 0;
+      let animationId = null;
 
-    let idleOffset = 0;
-    let speechOffset = 0;
-    let animationId = null;
-
-    // Canvas sizing (High DPI)
-    function resizeCanvas() {
-      const dpr = window.devicePixelRatio || 1;
-      const rect = canvas.getBoundingClientRect();
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      ctx.scale(dpr, dpr);
-    }
-
-    window.addEventListener('resize', resizeCanvas);
-    resizeCanvas();
-
-    function drawWaveform() {
-      animationId = requestAnimationFrame(drawWaveform);
-
-      const width = canvas.offsetWidth;
-      const height = canvas.offsetHeight;
-      const centerY = height / 2;
-      const centerX = width / 2;
-
-      ctx.clearRect(0, 0, width, height);
-
-      // Increment idle animation (20% slower)
-      idleOffset += 0.04;
-      // Speech-like variation (20% slower)
-      speechOffset += 0.096;
-
-      // Draw bars from center outwards
-      for (let i = 0; i <= BAR_COUNT; i++) {
-        // Base breathing animation
-        const idleHeight = Math.sin(idleOffset + i * 0.5) * 2 + MIN_BAR_HEIGHT;
-
-        // Speech-like variation: multiple sine waves at different frequencies
-        // Creates a more dynamic, speech-like pattern with more amplitude
-        const speech1 = Math.sin(speechOffset + i * 0.3) * 5;
-        const speech2 = Math.sin(speechOffset * 1.5 + i * 0.7) * 3.5;
-        const speech3 = Math.sin(speechOffset * 0.8 + i * 0.4) * 2.5;
-        const speechVariation = (speech1 + speech2 + speech3) * 1.2;
-
-        // Attenuation: bars are largest at center (i=0) and decrease towards edges (i=BAR_COUNT)
-        const attenuation = 1 - (i / BAR_COUNT);
-
-        // Combine breathing + speech variation
-        let barHeight = (idleHeight + speechVariation) * attenuation;
-
-        // Ensure minimum height
-        barHeight = Math.max(barHeight, MIN_BAR_HEIGHT * attenuation);
-
-        // Opacity: center bars are more opaque
-        const opacity = 0.3 + (attenuation * 0.7);
-        ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, opacity)})`;
-
-        // Draw Right Side
-        let xRight = centerX + (i * (BAR_WIDTH + BAR_GAP));
-        roundRect(ctx, xRight, centerY - barHeight / 2, BAR_WIDTH, barHeight, BAR_WIDTH / 2);
-
-        // Draw Left Side (Mirror) - always draw to close the gap
-        let xLeft = centerX - BAR_WIDTH - (i * (BAR_WIDTH + BAR_GAP));
-        roundRect(ctx, xLeft, centerY - barHeight / 2, BAR_WIDTH, barHeight, BAR_WIDTH / 2);
+      // Canvas sizing (High DPI)
+      function resizeCanvas() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
       }
-    }
 
-    function roundRect(ctx, x, y, width, height, radius) {
-      if (height < radius * 2) radius = height / 2;
-      ctx.beginPath();
-      ctx.roundRect(x, y, width, height, radius);
-      ctx.fill();
-    }
+      window.addEventListener("resize", resizeCanvas);
+      resizeCanvas();
 
-    // Start animation
-    drawWaveform();
-  </script>
-</body>
+      function drawWaveform() {
+        animationId = requestAnimationFrame(drawWaveform);
+
+        const width = canvas.offsetWidth;
+        const height = canvas.offsetHeight;
+        const centerY = height / 2;
+        const centerX = width / 2;
+
+        ctx.clearRect(0, 0, width, height);
+
+        // Increment idle animation (20% slower)
+        idleOffset += 0.04;
+        // Speech-like variation (20% slower)
+        speechOffset += 0.096;
+
+        // Draw bars from center outwards
+        for (let i = 0; i <= BAR_COUNT; i++) {
+          // Base breathing animation
+          const idleHeight =
+            Math.sin(idleOffset + i * 0.5) * 2 + MIN_BAR_HEIGHT;
+
+          // Speech-like variation: multiple sine waves at different frequencies
+          // Creates a more dynamic, speech-like pattern with more amplitude
+          const speech1 = Math.sin(speechOffset + i * 0.3) * 5;
+          const speech2 = Math.sin(speechOffset * 1.5 + i * 0.7) * 3.5;
+          const speech3 = Math.sin(speechOffset * 0.8 + i * 0.4) * 2.5;
+          const speechVariation = (speech1 + speech2 + speech3) * 1.2;
+
+          // Attenuation: bars are largest at center (i=0) and decrease towards edges (i=BAR_COUNT)
+          const attenuation = 1 - i / BAR_COUNT;
+
+          // Combine breathing + speech variation
+          let barHeight = (idleHeight + speechVariation) * attenuation;
+
+          // Ensure minimum height
+          barHeight = Math.max(barHeight, MIN_BAR_HEIGHT * attenuation);
+
+          // Opacity: center bars are more opaque
+          const opacity = 0.3 + attenuation * 0.7;
+          ctx.fillStyle = `rgba(255, 255, 255, ${Math.min(1, opacity)})`;
+
+          // Draw Right Side
+          let xRight = centerX + i * (BAR_WIDTH + BAR_GAP);
+          roundRect(
+            ctx,
+            xRight,
+            centerY - barHeight / 2,
+            BAR_WIDTH,
+            barHeight,
+            BAR_WIDTH / 2,
+          );
+
+          // Draw Left Side (Mirror) - always draw to close the gap
+          let xLeft = centerX - BAR_WIDTH - i * (BAR_WIDTH + BAR_GAP);
+          roundRect(
+            ctx,
+            xLeft,
+            centerY - barHeight / 2,
+            BAR_WIDTH,
+            barHeight,
+            BAR_WIDTH / 2,
+          );
+        }
+      }
+
+      function roundRect(ctx, x, y, width, height, radius) {
+        if (height < radius * 2) radius = height / 2;
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, radius);
+        ctx.fill();
+      }
+
+      // Start animation
+      drawWaveform();
+    </script>
+
+    <!-- PostHog Download Tracking -->
+    <script>
+      // Track download button clicks
+      document.addEventListener('DOMContentLoaded', function() {
+        const downloadButton = document.getElementById('download-button-hero');
+        
+        if (downloadButton) {
+          downloadButton.addEventListener('click', function(e) {
+            // Capture the download event with PostHog
+            if (window.posthog) {
+              posthog.capture('download_clicked', {
+                button_location: 'hero',
+                button_text: 'Download Free for macOS',
+                download_url: this.href,
+                timestamp: new Date().toISOString(),
+                user_agent: navigator.userAgent,
+                platform: navigator.platform
+              });
+            }
+          });
+        }
+
+        // Optional: Track GitHub button clicks
+        const githubButtons = document.querySelectorAll('a[href*="github.com/anthonyjacquelin/freesper"]');
+        githubButtons.forEach(function(button) {
+          button.addEventListener('click', function(e) {
+            if (window.posthog) {
+              posthog.capture('github_clicked', {
+                button_text: this.querySelector('span') ? this.querySelector('span').textContent : 'GitHub',
+                button_location: this.classList.contains('cta-button-secondary') ? 'hero' : 'footer',
+                timestamp: new Date().toISOString()
+              });
+            }
+          });
+        });
+      });
+    </script>
+  </body>
 </html>
