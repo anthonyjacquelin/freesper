@@ -1,6 +1,6 @@
 {
   "name": "freesper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "100% offline speech-to-text for macOS",
   "main": "src/main.js",
   "author": "freesper",
