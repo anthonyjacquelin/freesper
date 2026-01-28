@@ -387,6 +387,9 @@ async function showRecordingWindow() {
       }
     });
 
+    // Make window visible on all workspaces to prevent space switching
+    recordingWindow.setVisibleOnAllWorkspaces(true);
+
     recordingWindow.loadFile(path.join(__dirname, '../ui/recording.html'));
 
     // Wait for the renderer to be ready before proceeding
@@ -394,7 +397,7 @@ async function showRecordingWindow() {
       recordingWindow.webContents.once('did-finish-load', resolve);
     });
 
-    console.log('✓ Recording window loaded');
+    console.log('✓ Recording window loaded (visible on all workspaces)');
 
     // Enable DevTools in dev mode for debugging
     if (process.argv.includes('--dev')) {
