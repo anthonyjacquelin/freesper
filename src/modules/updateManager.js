@@ -5,6 +5,7 @@ class UpdateManager {
   constructor() {
     this.updateAvailable = false;
     this.updateInfo = null;
+    this.currentProgressCallback = null;
 
     // Configuration
     autoUpdater.autoDownload = false; // L'utilisateur choisit
@@ -68,9 +69,17 @@ class UpdateManager {
   }
 
   downloadUpdate(progressCallback) {
+    // Remove previous progress callback to prevent listener accumulation
+    if (this.currentProgressCallback) {
+      autoUpdater.removeListener('download-progress', this.currentProgressCallback);
+    }
+    
+    // Store and register new callback
+    this.currentProgressCallback = progressCallback;
     if (progressCallback) {
       autoUpdater.on('download-progress', progressCallback);
     }
+    
     return autoUpdater.downloadUpdate();
   }
 

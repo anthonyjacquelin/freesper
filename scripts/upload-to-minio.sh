@@ -35,16 +35,17 @@ fi
 MINIO_ALIAS="${MINIO_ALIAS:-myminio}"
 MINIO_BUCKET="${MINIO_BUCKET:-freesper}"
 
-# Lire la version depuis package.json
+# Lire la version et le nom du produit depuis package.json
 VERSION=$(node -p "require('./package.json').version")
+PRODUCT_NAME=$(node -p "require('./package.json').build.productName")
 
-echo -e "${GREEN}📦 Upload vers MinIO - Version ${VERSION}${NC}"
+echo -e "${GREEN}📦 Upload vers MinIO - ${PRODUCT_NAME} v${VERSION}${NC}"
 echo ""
 
 # Vérifier que les fichiers existent
 DIST_DIR="dist"
-DMG_FILE="${DIST_DIR}/freesper-${VERSION}-arm64.dmg"
-ZIP_FILE="${DIST_DIR}/freesper-${VERSION}-arm64-mac.zip"
+DMG_FILE="${DIST_DIR}/${PRODUCT_NAME}-${VERSION}-arm64.dmg"
+ZIP_FILE="${DIST_DIR}/${PRODUCT_NAME}-${VERSION}-arm64-mac.zip"
 YML_FILE="${DIST_DIR}/latest-mac.yml"
 
 if [ ! -f "${DMG_FILE}" ]; then

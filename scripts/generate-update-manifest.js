@@ -5,9 +5,10 @@ const path = require('path');
 // Load environment variables
 require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
-// Read package.json for version
+// Read package.json for version and product name
 const packageJson = require('../package.json');
 const version = packageJson.version;
+const productName = packageJson.build.productName;
 
 // Get update server URL from environment
 const updateServerUrl = process.env.UPDATE_SERVER_URL;
@@ -20,7 +21,7 @@ if (!updateServerUrl) {
 
 // Path to built ZIP
 const distPath = path.join(__dirname, '../dist');
-const zipFile = `freesper-${version}-arm64-mac.zip`;
+const zipFile = `${productName}-${version}-arm64-mac.zip`;
 const zipPath = path.join(distPath, zipFile);
 
 console.log('🔍 Generating update manifest for version', version);
@@ -84,7 +85,7 @@ console.log('✅ Update manifest generated:', manifestPath);
 console.log('');
 console.log('📦 Files to upload:');
 console.log(`   - ${zipFile}`);
-console.log(`   - freesper-${version}-arm64.dmg`);
+console.log(`   - ${productName}-${version}-arm64.dmg`);
 console.log(`   - latest-mac.yml`);
 console.log('');
 console.log('🌐 Upload to:', updateServerUrl);

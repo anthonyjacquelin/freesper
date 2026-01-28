@@ -10,7 +10,7 @@
     "dev": "electron . --dev",
     "check-env": "node scripts/check-env.js",
     "prebuild": "node scripts/download-python-standalone.js && node scripts/check-env.js",
-    "build": "electron-builder",
+    "build": "node scripts/build.js",
     "postbuild": "node scripts/generate-update-manifest.js",
     "rebuild": "electron-rebuild -f -w onnxruntime-node",
     "postinstall": "electron-rebuild -f -w onnxruntime-node"
