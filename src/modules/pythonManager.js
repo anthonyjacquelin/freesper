@@ -159,32 +159,32 @@ class PythonManager {
     await this.runCommand(venvPython, ['-m', 'pip', 'install', '--upgrade', 'pip']);
 
     // Step 3: Install numpy (30%)
-    if (progressCallback) progressCallback(30, 'Installation de numpy...');
+    if (progressCallback) progressCallback(30, 'Installing numpy...');
     console.log('   Installing numpy...');
     await this.runCommand(venvPip, ['install', 'numpy']);
 
     // Step 4: Install librosa (50%)
-    if (progressCallback) progressCallback(45, 'Installation de librosa...');
+    if (progressCallback) progressCallback(45, 'Installing librosa...');
     console.log('   Installing librosa...');
     await this.runCommand(venvPip, ['install', 'librosa']);
 
     // Step 5: Install soundfile (60%)
-    if (progressCallback) progressCallback(60, 'Installation de soundfile...');
+    if (progressCallback) progressCallback(60, 'Installing soundfile...');
     console.log('   Installing soundfile...');
     await this.runCommand(venvPip, ['install', 'soundfile']);
 
     // Step 6: Install torch (80% - this is the biggest package)
-    if (progressCallback) progressCallback(70, 'Installation de torch (peut prendre quelques minutes)...');
+    if (progressCallback) progressCallback(70, 'Installing torch (may take a few minutes)...');
     console.log('   Installing torch...');
     await this.runCommand(venvPip, ['install', 'torch', 'torchaudio']);
 
     // Step 7: Install sherpa-onnx (95%)
-    if (progressCallback) progressCallback(90, 'Installation de sherpa-onnx...');
+    if (progressCallback) progressCallback(90, 'Installing sherpa-onnx...');
     console.log('   Installing sherpa-onnx...');
     await this.runCommand(venvPip, ['install', 'sherpa-onnx']);
 
     // Step 8: Verify installation (100%)
-    if (progressCallback) progressCallback(95, 'Vérification...');
+    if (progressCallback) progressCallback(95, 'Verifying...');
     console.log('   Verifying installation...');
 
     try {
@@ -196,7 +196,7 @@ class PythonManager {
     // Mark as successfully installed
     fs.writeFileSync(this.statusFile, new Date().toISOString());
 
-    if (progressCallback) progressCallback(100, 'Installation terminée !');
+    if (progressCallback) progressCallback(100, 'Installation complete!');
     console.log('✅ Python dependencies installed successfully');
   }
 

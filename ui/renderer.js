@@ -25,8 +25,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   // Set up event listeners
-  document.getElementById('save-settings')?.addEventListener('click', saveSettings);
   document.getElementById('clear-history-btn')?.addEventListener('click', clearHistory);
+  
+  // Auto-paste checkbox - save immediately when changed
+  const autoPasteCheckbox = document.getElementById('auto-paste');
+  if (autoPasteCheckbox) {
+    autoPasteCheckbox.addEventListener('change', async () => {
+      await saveSettings();
+    });
+  }
+  
+  // Language select - save immediately when changed
+  const languageSelect = document.getElementById('language');
+  if (languageSelect) {
+    languageSelect.addEventListener('change', async () => {
+      await saveSettings();
+    });
+  }
   
   // Hotkey capture - click to activate
   const hotkeyDisplay = document.getElementById('hotkey-display');
@@ -120,7 +135,7 @@ async function loadModels() {
 
 function createInstalledModelCard(model) {
   const isActive = model.isActive ? 'active' : '';
-  const buttonText = model.isActive ? '✓ Actif' : 'Charger';
+  const buttonText = model.isActive ? '✓ Active' : 'Load';
   const buttonClass = model.isActive ? 'primary-btn active' : 'primary-btn';
   
   return `
@@ -129,14 +144,14 @@ function createInstalledModelCard(model) {
         <span class="model-name">${model.name}</span>
         <span class="model-size">${model.size}</span>
       </div>
-      ${model.isActive ? '<div class="model-badge">Modèle actif</div>' : ''}
+      ${model.isActive ? '<div class="model-badge">Active model</div>' : ''}
       <div class="model-description">${model.description}</div>
       <div class="model-actions">
         <button class="${buttonClass} load-model" data-path="${model.path}" ${model.isActive ? 'disabled' : ''}>
           ${buttonText}
         </button>
         <button class="danger-btn delete-model" data-model-id="${model.id}">
-          Supprimer
+          Delete
         </button>
       </div>
     </div>
@@ -162,8 +177,8 @@ function createAvailableModelCard(model) {
         </div>
         <div class="progress-info">
           <div class="progress-text">
-            <span class="progress-stage" id="progress-stage-${model.id}">Préparation</span>
-            <span class="progress-message" id="progress-message-${model.id}">Initialisation...</span>
+            <span class="progress-stage" id="progress-stage-${model.id}">Preparing</span>
+            <span class="progress-message" id="progress-message-${model.id}">Initializing...</span>
           </div>
           <span class="progress-percent" id="progress-percent-${model.id}">0%</span>
         </div>
@@ -171,7 +186,7 @@ function createAvailableModelCard(model) {
       
       <div class="model-actions">
         <button class="secondary-btn install-model" data-model-id="${model.id}" ${dataRepo} ${dataType}>
-          Installer
+          Install
         </button>
       </div>
     </div>
@@ -201,8 +216,8 @@ function attachModelEventListeners() {
         const progressPercent = document.getElementById(`progress-percent-${modelId}`);
         
         if (progressFill) progressFill.style.width = '5%';
-        if (progressStage) progressStage.textContent = 'Démarrage';
-        if (progressMessage) progressMessage.textContent = 'Préparation du téléchargement...';
+        if (progressStage) progressStage.textContent = 'Starting';
+        if (progressMessage) progressMessage.textContent = 'Preparing download...';
         if (progressPercent) progressPercent.textContent = '0%';
       }
 
@@ -226,8 +241,8 @@ function attachModelEventListeners() {
         const progressMessage = document.getElementById(`progress-message-${modelId}`);
         const progressFill = document.getElementById(`progress-fill-${modelId}`);
         
-        if (progressStage) progressStage.textContent = 'Erreur';
-        if (progressMessage) progressMessage.textContent = error.message || 'Installation échouée';
+        if (progressStage) progressStage.textContent = 'Error';
+        if (progressMessage) progressMessage.textContent = error.message || 'Installation failed';
         if (progressFill) progressFill.style.background = '#4a2a2a';
         
         // Reset after error
@@ -235,7 +250,7 @@ function attachModelEventListeners() {
           if (progressContainer) progressContainer.style.display = 'none';
           if (modelCard) modelCard.classList.remove('downloading');
           e.target.style.display = 'inline-block';
-          e.target.textContent = 'Installer';
+          e.target.textContent = 'Install';
           e.target.disabled = false;
           e.target.removeAttribute('data-installing');
           if (progressFill) progressFill.style.background = '';
@@ -259,14 +274,14 @@ function attachModelEventListeners() {
       const modelCard = e.target.closest('.model-card');
       const isActive = modelCard.classList.contains('active');
       
-      let confirmMessage = 'Êtes-vous sûr de vouloir supprimer ce modèle ? Cette action est irréversible.';
+      let confirmMessage = 'Are you sure you want to delete this model? This action cannot be undone.';
       
       if (isActive) {
-        confirmMessage = '⚠️ Ce modèle est actuellement actif.\n\n' +
-                        'Si vous le supprimez :\n' +
-                        '• Il sera déchargé de la mémoire\n' +
-                        '• L\'enregistrement sera désactivé jusqu\'à ce qu\'un nouveau modèle soit chargé\n\n' +
-                        'Êtes-vous sûr de vouloir continuer ?';
+        confirmMessage = '⚠️ This model is currently active.\n\n' +
+                        'If you delete it:\n' +
+                        '• It will be unloaded from memory\n' +
+                        '• Recording will be disabled until a new model is loaded\n\n' +
+                        'Are you sure you want to continue?';
       }
       
       if (confirm(confirmMessage)) {
@@ -311,16 +326,16 @@ function updateInstallButton(data) {
       if (stage === 'installing-deps') {
         progressStage.textContent = 'Configuration';
       } else if (stage === 'converting' || stage === 'downloading') {
-        progressStage.textContent = 'Téléchargement';
+        progressStage.textContent = 'Downloading';
       } else if (stage === 'extracting') {
-        progressStage.textContent = 'Extraction';
+        progressStage.textContent = 'Extracting';
       } else if (stage === 'complete') {
-        progressStage.textContent = 'Terminé';
+        progressStage.textContent = 'Complete';
         progressFill.classList.add('complete');
       } else if (stage === 'error') {
-        progressStage.textContent = 'Erreur';
+        progressStage.textContent = 'Error';
       } else {
-        progressStage.textContent = 'Installation';
+        progressStage.textContent = 'Installing';
       }
     }
     
@@ -329,13 +344,13 @@ function updateInstallButton(data) {
       if (message) {
         progressMessage.textContent = message;
       } else if (stage === 'installing-deps') {
-        progressMessage.textContent = 'Installation des dépendances Python...';
+        progressMessage.textContent = 'Installing Python dependencies...';
       } else if (stage === 'converting' || stage === 'downloading') {
-        progressMessage.textContent = 'Téléchargement du modèle en cours...';
+        progressMessage.textContent = 'Downloading model...';
       } else if (stage === 'extracting') {
-        progressMessage.textContent = 'Extraction de l\'archive...';
+        progressMessage.textContent = 'Extracting archive...';
       } else if (stage === 'complete') {
-        progressMessage.textContent = 'Le modèle est prêt à utiliser !';
+        progressMessage.textContent = 'Model is ready to use!';
         progressFill.style.width = '100%';
         progressPercent.textContent = '100%';
         
@@ -351,7 +366,7 @@ function updateInstallButton(data) {
           }, 500);
         }, 1500);
       } else if (stage === 'error') {
-        progressMessage.textContent = 'Une erreur est survenue';
+        progressMessage.textContent = 'An error occurred';
         progressFill.style.background = '#4a2a2a';
         
         // Reset after error
@@ -365,7 +380,7 @@ function updateInstallButton(data) {
           progressFill.classList.remove('complete');
         }, 3000);
       } else {
-        progressMessage.textContent = 'Veuillez patienter...';
+        progressMessage.textContent = 'Please wait...';
       }
     }
   }
@@ -375,11 +390,11 @@ function updateInstallButton(data) {
     if (stage === 'installing-deps' || message) {
       btn.textContent = message || `Configuration... ${Math.round(progress)}%`;
     } else if (stage === 'converting') {
-      btn.textContent = `Téléchargement... ${Math.round(progress)}%`;
+      btn.textContent = `Downloading... ${Math.round(progress)}%`;
     } else if (stage === 'complete') {
-      btn.textContent = 'Installé ✓';
+      btn.textContent = 'Installed ✓';
     } else if (stage === 'error') {
-      btn.textContent = 'Échec';
+      btn.textContent = 'Failed';
       btn.disabled = false;
       btn.removeAttribute('data-installing');
     } else if (progress !== undefined) {
@@ -410,13 +425,13 @@ window.copyToClipboard = function(text, button) {
 async function loadModel(modelPath, button) {
   const originalText = button.textContent;
   button.disabled = true;
-  button.textContent = 'Chargement...';
+  button.textContent = 'Loading...';
 
   try {
     const result = await ipcRenderer.invoke('load-model', modelPath);
 
     if (result.success) {
-      button.textContent = '✓ Chargé';
+      button.textContent = '✓ Loaded';
       
       // Reload models list to update active state
       setTimeout(async () => {
@@ -427,7 +442,7 @@ async function loadModel(modelPath, button) {
     }
   } catch (error) {
     console.error('Load failed:', error);
-    button.textContent = 'Échec';
+    button.textContent = 'Failed';
     setTimeout(() => {
       button.textContent = originalText;
       button.disabled = false;
@@ -440,16 +455,16 @@ async function deleteModel(modelId) {
     const result = await ipcRenderer.invoke('delete-model', modelId);
     
     if (result.success) {
-      console.log('Modèle supprimé avec succès');
-      // Recharger la liste des modèles
+      console.log('Model deleted successfully');
+      // Reload models list
       await loadModels();
     } else {
-      // Afficher l'erreur
-      alert(result.error || 'Échec de la suppression du modèle');
+      // Show error
+      alert(result.error || 'Failed to delete model');
     }
   } catch (error) {
     console.error('Failed to delete model:', error);
-    alert('Erreur lors de la suppression: ' + error.message);
+    alert('Error deleting model: ' + error.message);
   }
 }
 
@@ -642,13 +657,7 @@ async function saveSettings() {
 
   try {
     await ipcRenderer.invoke('save-settings', settings);
-
-    const btn = document.getElementById('save-settings');
-    const originalText = btn.textContent;
-    btn.textContent = 'Enregistré ✓';
-    setTimeout(() => {
-      btn.textContent = originalText;
-    }, 2000);
+    console.log('✓ Settings saved');
   } catch (error) {
     console.error('Failed to save settings:', error);
   }
@@ -668,7 +677,7 @@ function renderHistory(history) {
   const historyList = document.getElementById('history-list');
 
   if (!history || history.length === 0) {
-    historyList.innerHTML = '<p class="empty-state">Aucune transcription pour le moment</p>';
+    historyList.innerHTML = '<p class="empty-state">No transcriptions yet</p>';
     return;
   }
 
@@ -698,13 +707,13 @@ function createHistoryCard(item, index) {
       <div class="history-text ${isLongText ? 'collapsed' : ''}" id="history-text-${index}">${isLongText ? textPreview : cleanText}</div>
       ${isLongText ? `
         <button class="expand-btn" onclick="toggleHistoryText(${index})">
-          <span class="expand-label">Voir plus</span>
-          <span class="collapse-label" style="display:none;">Voir moins</span>
+          <span class="expand-label">Show more</span>
+          <span class="collapse-label" style="display:none;">Show less</span>
         </button>
       ` : ''}
       <div class="history-actions">
         <button class="secondary-btn copy-history" onclick="copyFromHistory(${index})">
-          Copier le texte
+          Copy text
         </button>
       </div>
     </div>
@@ -750,7 +759,7 @@ window.copyFromHistory = async function(index) {
       const btn = document.querySelector(`.history-card[data-index="${index}"] .copy-history`);
       if (btn) {
         const originalText = btn.textContent;
-        btn.textContent = 'Copié ✓';
+        btn.textContent = 'Copied ✓';
         btn.classList.add('copied');
         setTimeout(() => {
           btn.textContent = originalText;
@@ -770,7 +779,7 @@ ipcRenderer.on('transcription-complete', async () => {
 
 // Clear history
 async function clearHistory() {
-  if (!confirm('Êtes-vous sûr de vouloir effacer tout l\'historique ?')) {
+  if (!confirm('Are you sure you want to clear all history?')) {
     return;
   }
 

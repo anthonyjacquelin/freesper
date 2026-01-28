@@ -1,16 +1,16 @@
-# freesper Website
+# Freesper Website
 
-Ce dossier contient le site web marketing de freesper.
+This folder contains the Freesper marketing website.
 
-## Contenu
+## Contents
 
-- `index.html` - Page d'accueil du site web
-- `robots.txt` - Configuration pour les robots d'indexation
-- `sitemap.xml` - Sitemap pour le SEO
-- `SEO_CHANGES_SUMMARY.md` - Résumé des changements SEO
-- `SEO_DEPLOYMENT_GUIDE.md` - Guide de déploiement SEO
-- `SUPERWHISPER_COMPARISON.md` - Comparaison avec SuperWhisper
+- `index.html` - Website homepage
+- `robots.txt` - Search engine crawler configuration
+- `sitemap.xml` - Sitemap for SEO
+- `favicon.png` - Site favicon
+- `apple-touch-icon.png` - iOS icon
+- `og-image.png` / `og-image.svg` - Open Graph images for social media
 
-## Déploiement
+## Deployment
 
-Ce site est séparé de l'application Electron et peut être déployé sur n'importe quel service d'hébergement statique (Netlify, Vercel, GitHub Pages, etc.).
+This site is separate from the Electron app and can be deployed on any static hosting service (Netlify, Vercel, GitHub Pages, etc.).

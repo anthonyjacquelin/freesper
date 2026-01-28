@@ -8,14 +8,18 @@
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
-    "prebuild": "node scripts/download-python-standalone.js",
+    "check-env": "node scripts/check-env.js",
+    "prebuild": "node scripts/download-python-standalone.js && node scripts/check-env.js",
     "build": "electron-builder",
+    "postbuild": "node scripts/generate-update-manifest.js",
     "rebuild": "electron-rebuild -f -w onnxruntime-node",
     "postinstall": "electron-rebuild -f -w onnxruntime-node"
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "dotenv": "^17.2.3",
     "electron-store": "^8.1.0",
+    "electron-updater": "^6.7.3",
     "onnxruntime-node": "^1.23.2",
     "wav": "^1.0.2"
   },
@@ -26,7 +30,14 @@
   },
   "build": {
     "appId": "com.freesper.app",
-    "productName": "freesper",
+    "productName": "Freesper",
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "${UPDATE_SERVER_URL}",
+        "channel": "latest"
+      }
+    ],
     "compression": "maximum",
     "asar": true,
     "asarUnpack": [
@@ -59,8 +70,8 @@
         "teamId": "FZ9SPN6Y22"
       },
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "freesper utilise le microphone pour enregistrer votre voix et la transcrire en texte.",
-        "NSAppleEventsUsageDescription": "freesper envoie des événements AppleScript pour coller automatiquement le texte transcrit dans l'application active."
+        "NSMicrophoneUsageDescription": "Freesper uses the microphone to record your voice and transcribe it to text.",
+        "NSAppleEventsUsageDescription": "Freesper sends AppleScript events to automatically paste the transcribed text into the active application."
       }
     },
     "dmg": {

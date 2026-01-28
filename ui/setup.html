@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Configuration initiale - freesper</title>
+  <title>Initial Setup - Freesper</title>
   <style>
     * {
       margin: 0;
@@ -202,10 +202,10 @@
 <body>
   <div class="setup-container">
     <div class="logo-container">
-      <img src="freesper-icon.png" alt="freesper" class="logo" id="logo">
+      <img src="freesper-icon.png" alt="Freesper" class="logo" id="logo">
     </div>
-    <h1>Configuration initiale</h1>
-    <p class="subtitle">Installation des composants nécessaires pour la transcription</p>
+    <h1>Initial Setup</h1>
+    <p class="subtitle">Installing required components for transcription</p>
 
     <div class="progress-container">
       <div class="progress-bar" id="progressBar"></div>
@@ -216,11 +216,11 @@
       <div class="success-icon" id="successIcon"></div>
     </div>
 
-    <p class="progress-text" id="progressText">Préparation de l'environnement...</p>
+    <p class="progress-text" id="progressText">Preparing environment...</p>
 
     <div class="error-container" id="errorContainer">
       <div class="error-message" id="errorMessage"></div>
-      <button class="retry-button" onclick="retry()">Réessayer</button>
+      <button class="retry-button" onclick="retry()">Retry</button>
     </div>
   </div>
 
@@ -238,7 +238,7 @@
         setTimeout(() => {
           document.getElementById('spinner').style.display = 'none';
           document.getElementById('successIcon').classList.add('show');
-          document.getElementById('progressText').textContent = 'Configuration terminée !';
+          document.getElementById('progressText').textContent = 'Setup complete!';
           document.getElementById('progressText').style.color = '#4ade80';
         }, 500);
       }
@@ -263,7 +263,7 @@
       document.getElementById('spinner').style.display = 'block';
       document.getElementById('successIcon').classList.remove('show');
       document.getElementById('progressBar').style.width = '0%';
-      document.getElementById('progressText').textContent = 'Préparation de l\'environnement...';
+      document.getElementById('progressText').textContent = 'Preparing environment...';
       document.getElementById('progressText').style.color = '#525252';
 
       ipcRenderer.send('setup-retry');

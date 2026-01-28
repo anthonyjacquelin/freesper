@@ -1,12 +1,10 @@
-# freesper
+# Freesper
 
 **100% Offline Speech-to-Text for macOS**
 
-freesper is a privacy-focused, locally-running speech-to-text application for macOS. All processing happens on your device using optimized ML models.
+Freesper is a privacy-focused, locally-running speech-to-text application for macOS. All processing happens on your device using optimized ML models.
 
 <img width="339" height="359" alt="Capture d’écran 2026-01-21 à 17 45 14" src="https://github.com/user-attachments/assets/41db3231-cf25-4bdc-8141-a7ddfa44ba50" />
-
-> ⚠️ **Important**: Models must be converted locally to ONNX format before use. See [MODEL_SETUP.md](./MODEL_SETUP.md) for a 5-minute quick start guide.
 
 ## ✨ Features
 
@@ -144,7 +142,7 @@ Download from [Hugging Face Whisper Models](https://huggingface.co/openai/whispe
 
 ### Recording Audio
 
-1. Click the **freesper** icon in the menu bar
+1. Click the **Freesper** icon in the menu bar
 2. Press the hotkey (`Cmd+Shift+Space` by default)
 3. Speak your message
 4. Press the hotkey again to stop
@@ -323,7 +321,7 @@ Based on analysis of similar tools:
 4. **Streaming** - Process while recording
 5. **ArgmaxSDK** - Custom Whisper optimizations
 
-### How freesper Matches Performance
+### How Freesper Matches Performance
 
 1. **ONNX Runtime** - Industry-standard, highly optimized
 2. **CoreML Provider** - Native Apple acceleration
@@ -359,7 +357,57 @@ The complete inference pipeline is implemented:
 2. **Model Inference** - ONNX Runtime with CoreML acceleration
 3. **Token Decoding** - Full tokenizer with vocabulary support
 
-See [INFERENCE_GUIDE.md](./INFERENCE_GUIDE.md) for detailed documentation.
+## 🔄 Auto-Update Configuration
+
+Freesper includes an automatic update system that checks for new versions and allows users to update without reinstalling.
+
+### For Fork Maintainers
+
+If you're maintaining a fork, you need to configure your own update server:
+
+1. **Create configuration file**
+```bash
+cp .env.example .env
+```
+
+2. **Configure update server URL**
+```bash
+# Edit .env and set:
+UPDATE_SERVER_URL=http://your-server.com/updates/
+```
+
+3. **Choose your hosting option**:
+   - **MinIO / S3** (recommended for self-hosting)
+   - **Web server** (nginx, Apache)
+   - **GitHub Releases** (automatic with electron-builder)
+
+4. **Verify configuration**
+```bash
+npm run check-env
+```
+
+### Building Releases
+
+```bash
+# 1. Bump version
+npm version patch  # or minor, major
+
+# 2. Build (includes manifest generation)
+npm run build
+
+# 3. Upload to your server
+# - For MinIO: ./scripts/upload-to-minio.sh
+# - For web server: Manual SCP/SFTP
+# - For GitHub: npx electron-builder --publish always
+```
+
+### For End Users
+
+The app automatically checks for updates every time it launches. Users can also manually check via the menu:
+
+`Menu Bar Icon → Check for Updates`
+
+Updates are downloaded in the background and installed on next restart.
 
 ## 📝 License
 

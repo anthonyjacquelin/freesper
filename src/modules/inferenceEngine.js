@@ -168,7 +168,7 @@ class InferenceEngine {
     for (const file of requiredFiles) {
       const filePath = path.join(modelDir, file);
       if (!fs.existsSync(filePath)) {
-        throw new Error(`Fichier modèle manquant: ${file}`);
+        throw new Error(`Missing model file: ${file}`);
       }
     }
 

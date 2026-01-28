@@ -461,6 +461,13 @@ input[type="checkbox"] {
   border: 1px solid var(--border-strong);
   border-radius: 4px;
   position: relative;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+}
+
+label:has(input[type="checkbox"]) {
+  -webkit-app-region: no-drag;
+  cursor: pointer;
 }
 
 input[type="checkbox"]:checked {

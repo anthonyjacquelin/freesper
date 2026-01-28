@@ -7,6 +7,7 @@ const InferenceEngine = require('./modules/inferenceEngine');
 const ModelManager = require('./modules/modelManager');
 const SoundManager = require('./modules/soundManager');
 const PythonManager = require('./modules/pythonManager');
+const UpdateManager = require('./modules/updateManager');
 
 // Initialize store for settings
 const store = new Store();
@@ -47,7 +48,7 @@ function initFileLogging() {
       originalWarn.apply(console, args);
     };
     
-    console.log('=== freesper started ===');
+    console.log('=== Freesper started ===');
     console.log('Log file:', logPath);
     console.log('App version:', app.getVersion());
     console.log('Electron version:', process.versions.electron);
@@ -69,11 +70,13 @@ let tray = null;
 let mainWindow = null;
 let recordingWindow = null;
 let setupWindow = null;
+let updateWindow = null;
 let audioRecorder = null;
 let inferenceEngine = null;
 let modelManager = null;
 let soundManager = null;
 let pythonManager = null;
+let updateManager = null;
 let hasAccessibilityPermission = false;
 
 // Recording state
@@ -102,10 +105,10 @@ async function checkAccessibilityPermissions() {
   // In dev mode, just warn and continue without permissions
   // (Electron dev app won't appear properly in System Preferences)
   if (isDevMode) {
-    console.log('ℹ️  Mode développement détecté');
-    console.log('   Vérification des permissions d\'accessibilité ignorée');
-    console.log('   Auto-paste désactivé en dev (nécessite app packagée)');
-    console.log('   Le texte sera copié dans le presse-papiers');
+    console.log('ℹ️  Development mode detected');
+    console.log('   Accessibility permission check skipped');
+    console.log('   Auto-paste disabled in dev (requires packaged app)');
+    console.log('   Text will be copied to clipboard');
     hasAccessibilityPermission = false;
     return false;
   }
@@ -122,43 +125,126 @@ async function checkAccessibilityPermissions() {
 
   // Show dialog explaining why we need permissions (production only)
   console.log('⚠️  Accessibility permissions not yet granted, showing dialog...');
+  
+  await requestAccessibilityPermissions();
+
+  return hasAccessibilityPermission;
+}
+
+/**
+ * Request accessibility permissions with a user-friendly dialog
+ */
+async function requestAccessibilityPermissions() {
   const { response } = await dialog.showMessageBox({
-    type: 'info',
-    title: 'Permissions requises',
-    message: 'freesper a besoin des permissions d\'accessibilité',
-    detail: 'Pour coller automatiquement le texte transcrit dans vos applications, freesper a besoin des permissions d\'accessibilité.\n\nCliquez "Ouvrir les préférences" pour autoriser freesper dans:\nPréférences Système → Confidentialité et sécurité → Accessibilité',
-    buttons: ['Ouvrir les préférences', 'Plus tard'],
+    type: 'warning',
+    title: 'Accessibility Permissions Required',
+    message: 'Freesper needs accessibility permissions to auto-paste',
+    detail: 'Without this permission, you will need to manually paste (Cmd+V) after each transcription.\n\nTo enable auto-paste:\n1. Click "Open System Preferences"\n2. Click the lock icon to make changes\n3. Find and check "Freesper" in the list\n4. Restart Freesper if needed',
+    buttons: ['Open System Preferences', 'Skip (Manual Paste)'],
     defaultId: 0,
     cancelId: 1
   });
 
   if (response === 0) {
-    console.log('   User clicked "Ouvrir les préférences", requesting permission...');
+    console.log('   User clicked "Open System Preferences", requesting permission...');
     // Request permission - this will open System Preferences
     systemPreferences.isTrustedAccessibilityClient(true);
     
-    // Show follow-up dialog
-    await dialog.showMessageBox({
-      type: 'info',
-      title: 'Activer les permissions',
-      message: 'Activez freesper dans les préférences',
-      detail: '1. Cliquez sur le cadenas pour déverrouiller\n2. Cochez "freesper" dans la liste\n3. Redémarrez freesper si nécessaire\n\nSans cette permission, le texte sera copié dans le presse-papiers mais ne sera pas collé automatiquement.',
-      buttons: ['OK']
-    });
+    // Wait for user to potentially grant permission
+    await waitForAccessibilityPermission();
   } else {
-    console.log('   User clicked "Plus tard", skipping permission request');
+    console.log('   User clicked "Skip", auto-paste will be disabled');
+    showNotification('Auto-Paste Disabled', 'You can enable it later in Settings → Privacy & Security → Accessibility');
   }
 
-  // Re-check after user interaction
+  // Final check
   hasAccessibilityPermission = systemPreferences.isTrustedAccessibilityClient(false);
-  console.log('   After user interaction, isTrusted:', hasAccessibilityPermission);
+  console.log('   Final permission status:', hasAccessibilityPermission);
   
   if (!hasAccessibilityPermission) {
     console.warn('⚠️  Accessibility permissions not granted - auto-paste disabled');
-    console.warn('   Text will be copied to clipboard but not auto-pasted');
+  } else {
+    console.log('✅ Accessibility permissions granted - auto-paste enabled');
+    showNotification('Auto-Paste Enabled', 'Transcribed text will be automatically pasted');
+  }
+}
+
+/**
+ * Wait for user to grant accessibility permission with periodic checks
+ */
+async function waitForAccessibilityPermission() {
+  return new Promise(async (resolve) => {
+    // Show waiting dialog
+    const waitDialog = await dialog.showMessageBox({
+      type: 'info',
+      title: 'Waiting for Permission',
+      message: 'Please enable Freesper in System Preferences',
+      detail: 'After enabling the permission:\n• Check the box next to "Freesper"\n• Click "Done" below when finished\n\nNote: You may need to restart Freesper for changes to take effect.',
+      buttons: ['Done', 'Cancel'],
+      defaultId: 0,
+      cancelId: 1
+    });
+
+    if (waitDialog.response === 0) {
+      // Check if permission was granted
+      const granted = systemPreferences.isTrustedAccessibilityClient(false);
+      if (granted) {
+        hasAccessibilityPermission = true;
+        resolve(true);
+      } else {
+        // Permission still not granted, offer to check again
+        const retryDialog = await dialog.showMessageBox({
+          type: 'question',
+          title: 'Permission Not Detected',
+          message: 'Accessibility permission not yet enabled',
+          detail: 'Make sure you:\n1. Clicked the lock icon to unlock\n2. Checked the box next to "Freesper"\n\nWould you like to try again?',
+          buttons: ['Try Again', 'Skip for Now'],
+          defaultId: 0,
+          cancelId: 1
+        });
+
+        if (retryDialog.response === 0) {
+          // Open preferences again
+          systemPreferences.isTrustedAccessibilityClient(true);
+          await waitForAccessibilityPermission();
+        }
+        resolve(false);
+      }
+    } else {
+      resolve(false);
+    }
+  });
+}
+
+/**
+ * Setup auto-paste permissions (can be called from menu)
+ */
+async function setupAutoPastePermissions() {
+  if (process.platform !== 'darwin') {
+    showNotification('Not Required', 'Auto-paste permissions are only needed on macOS');
+    return;
   }
 
-  return hasAccessibilityPermission;
+  // Check current status
+  const currentStatus = systemPreferences.isTrustedAccessibilityClient(false);
+  
+  if (currentStatus) {
+    hasAccessibilityPermission = true;
+    const { response } = await dialog.showMessageBox({
+      type: 'info',
+      title: 'Auto-Paste Already Enabled',
+      message: 'Accessibility permissions are already granted',
+      detail: 'Freesper can automatically paste transcribed text.\n\nIf auto-paste is not working, try restarting the app.',
+      buttons: ['OK', 'Open System Preferences'],
+      defaultId: 0
+    });
+    
+    if (response === 1) {
+      systemPreferences.isTrustedAccessibilityClient(true);
+    }
+  } else {
+    await requestAccessibilityPermissions();
+  }
 }
 
 async function createTray() {
@@ -197,7 +283,7 @@ async function createTray() {
     },
     { type: 'separator' },
     {
-      label: 'Historique',
+      label: 'History',
       click: () => showHistory()
     },
     {
@@ -210,13 +296,22 @@ async function createTray() {
     },
     { type: 'separator' },
     {
+      label: 'Enable Auto-Paste...',
+      click: () => setupAutoPastePermissions()
+    },
+    {
+      label: 'Check for Updates',
+      click: () => checkForUpdatesManually()
+    },
+    { type: 'separator' },
+    {
       label: 'Quit',
       click: () => app.quit()
     }
   ]);
 
   if (tray) {
-    tray.setToolTip('freesper - Offline Speech-to-Text');
+    tray.setToolTip('Freesper - Offline Speech-to-Text');
     tray.setContextMenu(contextMenu);
   }
 }
@@ -341,7 +436,7 @@ async function toggleRecording() {
 async function startRecording() {
   if (!inferenceEngine.isModelLoaded()) {
     console.log('❌ Cannot start recording: No model loaded');
-    showNotification('Modèle requis', 'Veuillez télécharger et activer un modèle avant d\'enregistrer');
+    showNotification('Model Required', 'Please download and activate a model before recording');
 
     // Also show the model manager to help user
     setTimeout(() => {
@@ -398,20 +493,20 @@ async function stopRecording() {
 async function pasteToActiveApp() {
   console.log('📍 pasteToActiveApp() called');
   console.log('   Current hasAccessibilityPermission:', hasAccessibilityPermission);
-  
-  // Check if we have accessibility permissions
-  if (!hasAccessibilityPermission) {
-    // Re-check in case user granted permission while app was running
-    const recheckResult = process.platform !== 'darwin' || 
-      systemPreferences.isTrustedAccessibilityClient(false);
-    console.log('   Re-checking accessibility permission:', recheckResult);
-    hasAccessibilityPermission = recheckResult;
+
+  // Always re-check permissions before attempting paste
+  if (process.platform === 'darwin') {
+    const currentPermission = systemPreferences.isTrustedAccessibilityClient(false);
+    console.log('   Re-checking accessibility permission:', currentPermission);
+    hasAccessibilityPermission = currentPermission;
   }
 
   if (!hasAccessibilityPermission) {
     console.log('⚠️  Auto-paste skipped: no accessibility permissions');
     console.log('   Text has been copied to clipboard - paste manually with Cmd+V');
-    showNotification('Texte copié', 'Collez avec Cmd+V (permissions d\'accessibilité requises pour le collage auto)');
+    
+    // Show notification with action hint
+    showNotification('Text Copied - Paste with Cmd+V', 'Enable auto-paste via menu: Freesper → Enable Auto-Paste');
     return;
   }
 
@@ -421,25 +516,35 @@ async function pasteToActiveApp() {
   const execAsync = promisify(exec);
 
   // Small delay to ensure focus is correct
-  console.log('   Waiting 100ms before paste...');
-  await new Promise(resolve => setTimeout(resolve, 100));
+  console.log('   Waiting 150ms before paste...');
+  await new Promise(resolve => setTimeout(resolve, 150));
 
   try {
     console.log('   Executing AppleScript paste command...');
     // Simulate Command+V using AppleScript
-    const { stdout, stderr } = await execAsync('osascript -e \'tell application "System Events" to keystroke "v" using command down\'');
+    const { stdout, stderr } = await execAsync('osascript -e \'tell application "System Events" to keystroke "v" using command down\'', {
+      timeout: 5000 // 5 second timeout
+    });
     console.log('✅ AppleScript paste succeeded');
     if (stdout) console.log('   stdout:', stdout);
     if (stderr) console.log('   stderr:', stderr);
   } catch (error) {
     console.error('❌ Failed to paste:', error.message);
     console.error('   Error code:', error.code);
-    console.error('   stdout:', error.stdout);
-    console.error('   stderr:', error.stderr);
+    if (error.stdout) console.error('   stdout:', error.stdout);
+    if (error.stderr) console.error('   stderr:', error.stderr);
+
+    // Re-check permission status
+    const stillHasPermission = systemPreferences.isTrustedAccessibilityClient(false);
     
-    // If paste fails, it might be a permission issue
-    hasAccessibilityPermission = false;
-    showNotification('Texte copié', 'Collez avec Cmd+V (erreur de collage auto - vérifiez les permissions d\'accessibilité)');
+    if (!stillHasPermission) {
+      // Permission was revoked or never properly granted
+      hasAccessibilityPermission = false;
+      showNotification('Text Copied - Paste with Cmd+V', 'Auto-paste failed. Enable via: Freesper → Enable Auto-Paste');
+    } else {
+      // Permission exists but paste still failed (rare edge case)
+      showNotification('Text Copied', 'Auto-paste failed unexpectedly. Please paste manually with Cmd+V');
+    }
   }
 }
 
@@ -449,18 +554,42 @@ function showNotification(title, body) {
 }
 
 function showModelManager() {
-  mainWindow.webContents.send('show-view', 'model-manager');
-  mainWindow.show();
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    createMainWindow();
+    // Wait for renderer to fully load before sending IPC
+    mainWindow.webContents.once('did-finish-load', () => {
+      mainWindow.webContents.send('show-view', 'model-manager');
+    });
+  } else {
+    mainWindow.webContents.send('show-view', 'model-manager');
+    mainWindow.show();
+  }
 }
 
 function showSettings() {
-  mainWindow.webContents.send('show-view', 'settings');
-  mainWindow.show();
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    createMainWindow();
+    // Wait for renderer to fully load before sending IPC
+    mainWindow.webContents.once('did-finish-load', () => {
+      mainWindow.webContents.send('show-view', 'settings');
+    });
+  } else {
+    mainWindow.webContents.send('show-view', 'settings');
+    mainWindow.show();
+  }
 }
 
 function showHistory() {
-  mainWindow.webContents.send('show-view', 'history');
-  mainWindow.show();
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    createMainWindow();
+    // Wait for renderer to fully load before sending IPC
+    mainWindow.webContents.once('did-finish-load', () => {
+      mainWindow.webContents.send('show-view', 'history');
+    });
+  } else {
+    mainWindow.webContents.send('show-view', 'history');
+    mainWindow.show();
+  }
 }
 
 // IPC handlers
@@ -481,7 +610,9 @@ ipcMain.handle('get-models', async () => {
 
 ipcMain.handle('download-model', async (event, modelName) => {
   return await modelManager.downloadModel(modelName, (progress) => {
-    mainWindow.webContents.send('download-progress', { modelName, progress });
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('download-progress', { modelName, progress });
+    }
   });
 });
 
@@ -498,18 +629,22 @@ ipcMain.handle('download-parakeet-int8', async (event, { modelId }) => {
       if (progress >= 100) stage = 'complete';
       
       // Send progress to renderer (use conversion-progress for consistency)
-      mainWindow.webContents.send('conversion-progress', { 
-        modelId, 
-        progress,
-        message,
-        stage
-      });
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('conversion-progress', { 
+          modelId, 
+          progress,
+          message,
+          stage
+        });
+      }
     });
 
     if (result.success) {
       // Notify that installation is complete
       setTimeout(() => {
-        mainWindow.webContents.send('conversion-complete', { modelId });
+        if (mainWindow && !mainWindow.isDestroyed()) {
+          mainWindow.webContents.send('conversion-complete', { modelId });
+        }
       }, 500);
     }
 
@@ -517,12 +652,14 @@ ipcMain.handle('download-parakeet-int8', async (event, { modelId }) => {
   } catch (error) {
     console.error('Parakeet INT8 download failed:', error);
     // Send error to renderer
-    mainWindow.webContents.send('conversion-progress', { 
-      modelId, 
-      progress: 0,
-      message: error.message,
-      stage: 'error'
-    });
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('conversion-progress', { 
+        modelId, 
+        progress: 0,
+        message: error.message,
+        stage: 'error'
+      });
+    }
     return { success: false, error: error.message };
   }
 });
@@ -539,31 +676,31 @@ ipcMain.handle('load-model', async (event, modelPath) => {
 });
 
 ipcMain.handle('delete-model', async (event, modelId) => {
-  try {
-    // Check if this model is currently active
-    const activeModelPath = store.get('activeModel', null);
-    const modelDir = require('path').join(require('electron').app.getPath('userData'), 'models', modelId);
-    
-    // If deleting the active model, unload it first
-    if (activeModelPath && activeModelPath === modelDir) {
-      console.log(`⚠️  Suppression du modèle actif: ${modelId}`);
+    try {
+      // Check if this model is currently active
+      const activeModelPath = store.get('activeModel', null);
+      const modelDir = require('path').join(require('electron').app.getPath('userData'), 'models', modelId);
       
-      // Unload the model
-      if (inferenceEngine) {
-        inferenceEngine.cleanup();
+      // If deleting the active model, unload it first
+      if (activeModelPath && activeModelPath === modelDir) {
+        console.log(`⚠️  Deleting active model: ${modelId}`);
+        
+        // Unload the model
+        if (inferenceEngine) {
+          inferenceEngine.cleanup();
+        }
+        
+        // Clear the active model setting
+        store.delete('activeModel');
+        
+        console.log('✓ Model unloaded from memory');
       }
       
-      // Clear the active model setting
-      store.delete('activeModel');
+      const result = modelManager.deleteModel(modelId);
       
-      console.log('✓ Modèle déchargé de la mémoire');
-    }
-    
-    const result = modelManager.deleteModel(modelId);
-    
-    if (result.success) {
-      console.log(`✓ Modèle supprimé du disque: ${modelId}`);
-    }
+      if (result.success) {
+        console.log(`✓ Model deleted from disk: ${modelId}`);
+      }
     
     return result;
   } catch (error) {
@@ -765,6 +902,53 @@ ipcMain.handle('clear-history', async () => {
   return { success: true };
 });
 
+// Update handlers
+ipcMain.handle('get-app-version', async () => {
+  return app.getVersion();
+});
+
+ipcMain.handle('check-for-updates', async () => {
+  if (!updateManager) {
+    console.log('Update manager not initialized');
+    return null;
+  }
+  return await updateManager.checkForUpdates();
+});
+
+ipcMain.handle('download-update', async () => {
+  if (!updateManager) {
+    throw new Error('Update manager not initialized');
+  }
+  return await updateManager.downloadUpdate((progress) => {
+    if (updateWindow && !updateWindow.isDestroyed()) {
+      updateWindow.webContents.send('update-download-progress', progress);
+    }
+  });
+});
+
+ipcMain.handle('install-update-now', async () => {
+  if (!updateManager) {
+    throw new Error('Update manager not initialized');
+  }
+  updateManager.quitAndInstall();
+});
+
+ipcMain.handle('install-update-on-quit', async () => {
+  if (!updateManager) {
+    throw new Error('Update manager not initialized');
+  }
+  updateManager.scheduleInstallOnQuit();
+  if (updateWindow && !updateWindow.isDestroyed()) {
+    updateWindow.close();
+  }
+});
+
+ipcMain.on('update-window-close', () => {
+  if (updateWindow && !updateWindow.isDestroyed()) {
+    updateWindow.close();
+  }
+});
+
 // Window controls
 ipcMain.on('window-close', () => {
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -865,6 +1049,73 @@ function createSetupWindow() {
 }
 
 /**
+ * Create update notification window
+ */
+function createUpdateWindow(updateInfo) {
+  if (updateWindow && !updateWindow.isDestroyed()) {
+    updateWindow.focus();
+    return;
+  }
+
+  updateWindow = new BrowserWindow({
+    width: 500,
+    height: 550,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    show: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  });
+
+  updateWindow.loadFile(path.join(__dirname, '../ui/update.html'));
+
+  updateWindow.once('ready-to-show', () => {
+    updateWindow.webContents.send('update-info', updateInfo);
+    updateWindow.show();
+  });
+
+  updateWindow.on('closed', () => {
+    updateWindow = null;
+  });
+}
+
+/**
+ * Check for updates manually (from menu)
+ */
+async function checkForUpdatesManually() {
+  if (!updateManager) {
+    console.log('Update manager not initialized');
+    const isDevMode = !app.isPackaged;
+    const message = isDevMode
+      ? 'Update manager not available in dev mode. Build the app to test updates.'
+      : 'Update manager is not available';
+    showNotification('Update Check', message);
+    return;
+  }
+
+  console.log('🔄 Manual update check requested');
+
+  try {
+    const result = await updateManager.checkForUpdates();
+
+    if (result && result.updateInfo) {
+      console.log('✅ Update available:', result.updateInfo.version);
+      createUpdateWindow(result.updateInfo);
+    } else {
+      console.log('ℹ️ No update available');
+      showNotification('No Update Available', 'You already have the latest version of Freesper');
+    }
+  } catch (error) {
+    console.error('❌ Update check failed:', error);
+    showNotification('Error', 'Unable to check for updates: ' + error.message);
+  }
+}
+
+/**
  * Initialize Python environment with UI progress
  * Shows setup window if dependencies need to be installed
  */
@@ -941,6 +1192,116 @@ async function ensurePythonDependencies() {
   });
 }
 
+// Create Application menu (macOS menu bar)
+function createApplicationMenu() {
+  if (process.platform === 'darwin') {
+    const template = [
+      {
+        label: app.name,
+        submenu: [
+          {
+            label: 'About Freesper',
+            role: 'about'
+          },
+          {
+            label: 'Check for Updates...',
+            click: () => checkForUpdatesManually()
+          },
+          { type: 'separator' },
+          {
+            label: 'Enable Auto-Paste...',
+            click: () => setupAutoPastePermissions()
+          },
+          {
+            label: 'Settings',
+            accelerator: 'Command+,',
+            click: () => showSettings()
+          },
+          { type: 'separator' },
+          { role: 'services' },
+          { type: 'separator' },
+          { role: 'hide' },
+          { role: 'hideOthers' },
+          { role: 'unhide' },
+          { type: 'separator' },
+          { role: 'quit' }
+        ]
+      },
+        {
+          label: 'File',
+          submenu: [
+            {
+              label: 'Record',
+              accelerator: 'CommandOrControl+Shift+Space',
+              click: () => toggleRecording()
+            },
+            { type: 'separator' },
+            {
+              label: 'History',
+              click: () => showHistory()
+            },
+            {
+              label: 'Download Models',
+              click: () => showModelManager()
+            },
+            { type: 'separator' },
+            { role: 'close' }
+          ]
+        },
+      {
+        label: 'Edit',
+        submenu: [
+          { role: 'undo' },
+          { role: 'redo' },
+          { type: 'separator' },
+          { role: 'cut' },
+          { role: 'copy' },
+          { role: 'paste' },
+          { role: 'selectAll' }
+        ]
+      },
+      {
+        label: 'View',
+        submenu: [
+          { role: 'reload' },
+          { role: 'forceReload' },
+          { role: 'toggleDevTools' },
+          { type: 'separator' },
+          { role: 'resetZoom' },
+          { role: 'zoomIn' },
+          { role: 'zoomOut' },
+          { type: 'separator' },
+          { role: 'togglefullscreen' }
+        ]
+      },
+      {
+        label: 'Window',
+        submenu: [
+          { role: 'minimize' },
+          { role: 'zoom' },
+          { type: 'separator' },
+          { role: 'front' }
+        ]
+      },
+      {
+        label: 'Help',
+        submenu: [
+          {
+            label: 'Learn More',
+            click: async () => {
+              const { shell } = require('electron');
+              await shell.openExternal('https://github.com/anthonyjacquelin/freesper');
+            }
+          }
+        ]
+      }
+    ];
+
+    const menu = Menu.buildFromTemplate(template);
+    Menu.setApplicationMenu(menu);
+  }
+}
+
 // Create Dock menu (macOS fallback)
 function createDockMenu() {
   if (process.platform === 'darwin') {
@@ -960,7 +1321,7 @@ function createDockMenu() {
       },
       { type: 'separator' },
       {
-        label: 'Historique',
+        label: 'History',
         click: () => showHistory()
       },
       {
@@ -1061,6 +1422,7 @@ app.whenReady().then(async () => {
     store.delete('activeModel');
   }
 
+  createApplicationMenu(); // macOS menu bar
   createTray();
   createMainWindow();
   createDockMenu(); // Fallback if tray doesn't work
@@ -1068,6 +1430,28 @@ app.whenReady().then(async () => {
 
   // Check accessibility permissions for auto-paste
   await checkAccessibilityPermissions();
+
+  // Initialize update manager (always, for manual checks via menu)
+  updateManager = new UpdateManager();
+  console.log('🔄 Update manager initialized');
+
+  // Auto-check for updates only in packaged mode
+  if (app.isPackaged) {
+    // Check for updates 5 seconds after launch
+    setTimeout(() => {
+      console.log('🔄 Checking for updates automatically...');
+      updateManager.checkForUpdates().then(result => {
+        if (result && result.updateInfo) {
+          console.log('✅ Update available:', result.updateInfo.version);
+          createUpdateWindow(result.updateInfo);
+        } else {
+          console.log('ℹ️ No update available');
+        }
+      }).catch(error => {
+        console.log('⚠️  Update check failed (silent):', error.message);
+      });
+    }, 5000);
+  }
 
   // Show welcome message on first run OR dev mode
   const hasRun = store.get('hasRun');
@@ -1080,7 +1464,7 @@ app.whenReady().then(async () => {
 
     console.log('');
     console.log('═══════════════════════════════════════════');
-    console.log('  Welcome to freesper!');
+    console.log('  Welcome to Freesper!');
     console.log('═══════════════════════════════════════════');
     console.log('');
     console.log('✓ App is running');
@@ -1105,7 +1489,7 @@ app.whenReady().then(async () => {
       showModelManager();
     }, 500);
   } else {
-    console.log('✓ freesper is running');
+    console.log('✓ Freesper is running');
     console.log('✓ Hotkey: Cmd+Shift+Space');
     console.log('✓ Right-click Dock icon for menu');
   }

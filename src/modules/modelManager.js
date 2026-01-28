@@ -16,7 +16,7 @@ class ModelManager {
         type: 'sherpa-onnx',
         downloadUrl: 'https://github.com/k2-fsa/sherpa-onnx/releases/download/asr-models/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8.tar.bz2',
         size: '639MB',
-        description: '🏆 Meilleur modèle - 25 langues dont Français - Haute qualité'
+        description: '🏆 Best model - 25 languages including French - High quality'
       }
       // Whisper models will be added in a future version
     ];
@@ -225,7 +225,7 @@ class ModelManager {
     const archivePath = path.join(this.modelsDir, 'parakeet-int8.tar.bz2');
 
     try {
-      // Vérifier si le modèle est déjà installé
+      // Check if model is already installed
       if (fs.existsSync(modelDir)) {
         const requiredFiles = ['encoder.int8.onnx', 'decoder.int8.onnx', 'joiner.int8.onnx', 'tokens.txt'];
         const allFilesExist = requiredFiles.every(file => 
@@ -233,30 +233,30 @@ class ModelManager {
         );
         
         if (allFilesExist) {
-          console.log('Parakeet INT8 déjà installé');
-          progressCallback && progressCallback(100, 'Déjà installé');
+          console.log('Parakeet INT8 already installed');
+          progressCallback && progressCallback(100, 'Already installed');
           return { success: true, path: modelDir };
         }
         
-        // Fichiers incomplets, supprimer et réinstaller
-        console.log('Installation incomplète détectée, nettoyage...');
+        // Incomplete files, remove and reinstall
+        console.log('Incomplete installation detected, cleaning up...');
         fs.rmSync(modelDir, { recursive: true, force: true });
       }
 
-      // Créer le répertoire
+      // Create directory
       fs.mkdirSync(modelDir, { recursive: true });
 
-      // Télécharger avec curl (natif sur macOS)
-      console.log('Téléchargement de Parakeet INT8...');
-      progressCallback && progressCallback(10, 'Téléchargement en cours...');
+      // Download with curl (native on macOS)
+      console.log('Downloading Parakeet INT8...');
+      progressCallback && progressCallback(10, 'Downloading...');
 
       await execAsync(`curl -L -o "${archivePath}" "${downloadUrl}"`, {
         maxBuffer: 1024 * 1024 * 100 // 100MB buffer
       });
 
-      progressCallback && progressCallback(60, 'Extraction de l\'archive...');
+      progressCallback && progressCallback(60, 'Extracting archive...');
 
-      // Extraire l'archive dans un dossier temporaire
+      // Extract archive to temporary folder
       const tempDir = path.join(this.modelsDir, 'temp-parakeet-extract');
       if (fs.existsSync(tempDir)) {
         fs.rmSync(tempDir, { recursive: true, force: true });
@@ -265,12 +265,12 @@ class ModelManager {
 
       await execAsync(`tar -xjf "${archivePath}" -C "${tempDir}"`);
 
-      progressCallback && progressCallback(80, 'Organisation des fichiers...');
+      progressCallback && progressCallback(80, 'Organizing files...');
 
-      // Le dossier extrait a un nom spécifique
+      // The extracted folder has a specific name
       const extractedDir = path.join(tempDir, 'sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8');
       
-      // Copier les fichiers nécessaires uniquement
+      // Copy only required files
       if (fs.existsSync(extractedDir)) {
         const requiredFiles = [
           'encoder.int8.onnx',
@@ -285,28 +285,28 @@ class ModelManager {
           if (fs.existsSync(srcPath)) {
             fs.copyFileSync(srcPath, destPath);
           } else {
-            throw new Error(`Fichier manquant dans l'archive: ${file}`);
+            throw new Error(`Missing file in archive: ${file}`);
           }
         }
       } else {
-        throw new Error('Dossier extrait introuvable');
+        throw new Error('Extracted folder not found');
       }
 
-      // Nettoyer
+      // Clean up
       fs.rmSync(tempDir, { recursive: true, force: true });
       fs.unlinkSync(archivePath);
 
-      // Installer les dépendances Python nécessaires pour Sherpa-ONNX
-      progressCallback && progressCallback(90, 'Installation des dépendances Python...');
+      // Install Python dependencies required for Sherpa-ONNX
+      progressCallback && progressCallback(90, 'Installing Python dependencies...');
       await this.installSherpaOnnxDependencies();
 
-      progressCallback && progressCallback(100, 'Installation terminée !');
+      progressCallback && progressCallback(100, 'Installation complete!');
 
       return { success: true, path: modelDir, outputDir: modelDir };
 
     } catch (error) {
-      console.error('Erreur téléchargement Parakeet INT8:', error);
-      // Nettoyer en cas d'erreur
+      console.error('Error downloading Parakeet INT8:', error);
+      // Clean up on error
       if (fs.existsSync(archivePath)) {
         try { fs.unlinkSync(archivePath); } catch (e) {}
       }
@@ -351,7 +351,7 @@ class ModelManager {
         console.log('✓ Python venv created');
       } catch (error) {
         console.error('Failed to create Python venv:', error);
-        throw new Error('Impossible de créer l\'environnement Python. Assurez-vous que Python 3 est installé.');
+        throw new Error('Unable to create Python environment. Make sure Python 3 is installed.');
       }
     }
 

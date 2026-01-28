@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>freesper</title>
+  <title>Freesper</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -11,13 +11,13 @@
     <!-- Navigation Tabs with Window Controls -->
     <div class="nav-tabs">
       <div class="window-controls">
-        <button class="window-button close" id="close-button" title="Fermer"></button>
-        <button class="window-button minimize" id="minimize-button" title="Réduire"></button>
-        <button class="window-button maximize" id="maximize-button" title="Agrandir"></button>
+        <button class="window-button close" id="close-button" title="Close"></button>
+        <button class="window-button minimize" id="minimize-button" title="Minimize"></button>
+        <button class="window-button maximize" id="maximize-button" title="Maximize"></button>
       </div>
-      <button class="nav-tab active" data-view="model-manager">Modèles</button>
-      <button class="nav-tab" data-view="history">Historique</button>
-      <button class="nav-tab" data-view="settings">Paramètres</button>
+      <button class="nav-tab active" data-view="model-manager">Models</button>
+      <button class="nav-tab" data-view="history">History</button>
+      <button class="nav-tab" data-view="settings">Settings</button>
     </div>
 
     <!-- Model Manager View -->
@@ -38,8 +38,8 @@
         <div class="info-banner">
           <span class="info-icon">✨</span>
           <div>
-            <strong>Modèles disponibles</strong>
-            <p>Installez le modèle Parakeet INT8 pour commencer à transcrire en haute qualité.</p>
+            <strong>Available Models</strong>
+            <p>Install the Parakeet INT8 model to start transcribing in high quality.</p>
           </div>
         </div>
         <div id="available-models" class="model-list">
@@ -55,10 +55,10 @@
       </div>
 
       <div class="section">
-        <h2>Raccourci Clavier</h2>
+        <h2>Keyboard Shortcut</h2>
         
         <div class="hotkey-capture-group">
-          <label for="hotkey">Touche d'enregistrement</label>
+          <label for="hotkey">Recording Hotkey</label>
           <div class="hotkey-display" id="hotkey-display">
             <div class="hotkey-keys" id="hotkey-keys">
               <span class="key-badge">Cmd</span>
@@ -68,15 +68,15 @@
               <span class="key-badge">Space</span>
             </div>
             <div class="hotkey-prompt" id="hotkey-prompt" style="display: none;">
-              Appuyez sur votre combinaison de touches...
+              Press your key combination...
             </div>
           </div>
-          <p class="hint">Cliquez sur le champ ci-dessus et appuyez sur une touche simple (F5, A, etc.) ou une combinaison (Cmd+Shift+R)</p>
+          <p class="hint">Click the field above and press a single key (F5, A, etc.) or a combination (Cmd+Shift+R)</p>
         </div>
 
-        <label for="language">Langue</label>
+        <label for="language">Language</label>
         <select id="language">
-          <option value="auto">Détection Automatique</option>
+          <option value="auto">Auto Detect</option>
           <option value="en">English</option>
           <option value="es">Español</option>
           <option value="fr">Français</option>
@@ -87,27 +87,25 @@
 
         <label>
           <input type="checkbox" id="auto-paste">
-          Coller automatiquement après la transcription
+          Auto-paste after transcription
         </label>
-
-        <button id="save-settings" class="primary-btn">Enregistrer les Paramètres</button>
       </div>
     </div>
 
     <!-- History View -->
     <div id="history-view" class="view">
       <div class="header">
-        <h1>Historique des Transcriptions</h1>
+        <h1>Transcription History</h1>
       </div>
 
       <div class="section">
         <div class="history-header-actions">
           <button id="clear-history-btn" class="danger-btn" style="margin-bottom: 20px;">
-            Effacer l'historique
+            Clear History
           </button>
         </div>
         <div id="history-list" class="history-list">
-          <p class="empty-state">Aucune transcription pour le moment</p>
+          <p class="empty-state">No transcriptions yet</p>
         </div>
       </div>
     </div>

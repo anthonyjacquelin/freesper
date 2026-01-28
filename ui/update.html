@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Update Available - Freesper</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+      background: #0d0d0d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .update-container {
+      background: #171717;
+      border: 1px solid #262626;
+      border-radius: 16px;
+      padding: 48px 60px;
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+      position: relative;
+    }
+
+    .logo-container {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    h1 {
+      font-size: 22px;
+      color: #ffffff;
+      margin-bottom: 20px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    .version-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding: 12px 20px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+    }
+
+    .current-version {
+      font-size: 14px;
+      color: #737373;
+      font-weight: 500;
+    }
+
+    .arrow {
+      font-size: 16px;
+      color: #525252;
+    }
+
+    .new-version {
+      font-size: 14px;
+      color: #4ade80;
+      font-weight: 600;
+    }
+
+    .release-notes {
+      margin-bottom: 16px;
+      padding: 16px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+
+    .release-notes p {
+      font-size: 13px;
+      color: #a3a3a3;
+      line-height: 1.6;
+    }
+
+    .download-info {
+      font-size: 12px;
+      color: #737373;
+      margin-bottom: 32px;
+    }
+
+    .progress-section {
+      display: none;
+      margin-bottom: 32px;
+    }
+
+    .progress-container {
+      width: 100%;
+      height: 6px;
+      background: #262626;
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: #4ade80;
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 3px;
+      box-shadow: 0 0 10px rgba(74, 222, 128, 0.3);
+    }
+
+    .progress-text {
+      font-size: 13px;
+      color: #a3a3a3;
+      font-weight: 500;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .primary-button {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .primary-button:hover {
+      background: #e5e5e5;
+      transform: translateY(-1px);
+    }
+
+    .primary-button:active {
+      transform: translateY(0);
+      background: #d4d4d4;
+    }
+
+    .secondary-button {
+      background: #262626;
+      color: #ffffff;
+      border: 1px solid #3a3a3a;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .secondary-button:hover {
+      background: #2a2a2a;
+      border-color: #4a4a4a;
+    }
+
+    .secondary-button:active {
+      background: #222222;
+    }
+
+    .tertiary-button {
+      background: transparent;
+      color: #737373;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+    }
+
+    .tertiary-button:hover {
+      color: #a3a3a3;
+      background: #1a1a1a;
+    }
+
+    .tertiary-button:active {
+      background: #151515;
+    }
+
+    .error-container {
+      display: none;
+      margin-top: 24px;
+    }
+
+    .error-message {
+      background: #2a1a1a;
+      border: 1px solid #4a2a2a;
+      border-radius: 8px;
+      padding: 16px;
+      color: #ff6b6b;
+      margin-bottom: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .retry-button {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .retry-button:hover {
+      background: #e5e5e5;
+      transform: translateY(-1px);
+    }
+
+    .retry-button:active {
+      transform: translateY(0);
+      background: #d4d4d4;
+    }
+  </style>
+</head>
+<body>
+  <div class="update-container">
+    <div class="logo-container">
+      <img src="freesper-icon.png" alt="Freesper" class="logo">
+    </div>
+
+    <h1>Update Available</h1>
+
+    <div class="version-badge">
+      <span class="current-version">v<span id="currentVersion">1.0.0</span></span>
+      <span class="arrow">→</span>
+      <span class="new-version">v<span id="newVersion">1.0.1</span></span>
+    </div>
+
+    <div class="release-notes">
+      <p id="releaseNotes">New features and bug fixes</p>
+    </div>
+
+    <p class="download-info">
+      Size: <span id="downloadSize">--</span>
+    </p>
+
+    <div class="progress-section" id="progressSection">
+      <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <p class="progress-text" id="progressText">Downloading...</p>
+    </div>
+
+    <div class="button-group" id="buttonGroup">
+      <button class="primary-button" onclick="installNow()">
+        Install Now
+      </button>
+      <button class="secondary-button" onclick="installOnQuit()">
+        Install on Quit
+      </button>
+      <button class="tertiary-button" onclick="remindLater()">
+        Remind Me Later
+      </button>
+    </div>
+
+    <div class="error-container" id="errorContainer">
+      <div class="error-message" id="errorMessage"></div>
+      <button class="retry-button" onclick="retry()">Retry</button>
+    </div>
+  </div>
+
+  <script>
+    const { ipcRenderer } = require('electron');
+
+    let updateInfo = null;
+    let currentVersion = '';
+
+    // Get current version from main process
+    ipcRenderer.invoke('get-app-version').then(version => {
+      currentVersion = version;
+      document.getElementById('currentVersion').textContent = version;
+    });
+
+    // Receive update info
+    ipcRenderer.on('update-info', (event, info) => {
+      updateInfo = info;
+      document.getElementById('newVersion').textContent = info.version;
+
+      // Format release notes
+      const releaseNotes = info.releaseNotes || info.releaseName || 'New features and bug fixes';
+      document.getElementById('releaseNotes').textContent = releaseNotes;
+
+      // Format size
+      if (info.files && info.files.length > 0 && info.files[0].size) {
+        const sizeMB = (info.files[0].size / (1024 * 1024)).toFixed(1);
+        document.getElementById('downloadSize').textContent = sizeMB + ' MB';
+      }
+    });
+
+    // Download progress
+    ipcRenderer.on('update-download-progress', (event, progress) => {
+      document.getElementById('progressSection').style.display = 'block';
+      document.getElementById('buttonGroup').style.display = 'none';
+
+      const percent = Math.round(progress.percent);
+      document.getElementById('progressBar').style.width = percent + '%';
+
+      const speedMB = (progress.bytesPerSecond / (1024 * 1024)).toFixed(1);
+      document.getElementById('progressText').textContent =
+        `Downloading... ${percent}% (${speedMB} MB/s)`;
+    });
+
+    async function installNow() {
+      try {
+        await ipcRenderer.invoke('download-update');
+        // After download completes
+        document.getElementById('progressText').textContent = 'Installing...';
+        await ipcRenderer.invoke('install-update-now');
+      } catch (error) {
+        showError(error.message || 'Download failed');
+      }
+    }
+
+    async function installOnQuit() {
+      try {
+        document.getElementById('progressSection').style.display = 'block';
+        document.getElementById('buttonGroup').style.display = 'none';
+        await ipcRenderer.invoke('download-update');
+        await ipcRenderer.invoke('install-update-on-quit');
+        // Window closes automatically
+      } catch (error) {
+        showError(error.message || 'Download failed');
+      }
+    }
+
+    function remindLater() {
+      ipcRenderer.send('update-window-close');
+    }
+
+    function showError(message) {
+      document.getElementById('progressSection').style.display = 'none';
+      document.getElementById('buttonGroup').style.display = 'none';
+      document.getElementById('errorContainer').style.display = 'block';
+      document.getElementById('errorMessage').textContent = message;
+    }
+
+    function retry() {
+      document.getElementById('errorContainer').style.display = 'none';
+      document.getElementById('buttonGroup').style.display = 'flex';
+    }
+  </script>
+</body>
+</html>
