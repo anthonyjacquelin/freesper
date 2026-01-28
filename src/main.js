@@ -348,6 +348,25 @@ function createMainWindow() {
   }
 }
 
+/**
+ * Detect the active screen based on cursor position
+ * @returns {Electron.Display} The display where the cursor is located
+ */
+function getActiveDisplay() {
+  try {
+    const { screen } = require('electron');
+    const cursorPos = screen.getCursorScreenPoint();
+    const activeDisplay = screen.getDisplayNearestPoint(cursorPos);
+
+    console.log(`✓ Detected active display: ${activeDisplay.id} (${activeDisplay.bounds.width}x${activeDisplay.bounds.height})`);
+    return activeDisplay;
+  } catch (error) {
+    console.warn('⚠️ Failed to detect active display, falling back to primary:', error.message);
+    const { screen } = require('electron');
+    return screen.getPrimaryDisplay();
+  }
+}
+
 async function showRecordingWindow() {
   if (!recordingWindow) {
     recordingWindow = new BrowserWindow({
@@ -380,10 +399,9 @@ async function showRecordingWindow() {
     }
   }
 
-  // Center on screen
-  const { screen } = require('electron');
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { width, height } = primaryDisplay.workAreaSize;
+  // Center on active screen (where cursor is located)
+  const activeDisplay = getActiveDisplay();
+  const { width, height } = activeDisplay.workAreaSize;
 
   recordingWindow.setPosition(
     Math.floor((width - 400) / 2),
