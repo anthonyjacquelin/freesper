@@ -68,7 +68,7 @@ class UpdateManager {
     }
   }
 
-  downloadUpdate(progressCallback) {
+  async downloadUpdate(progressCallback) {
     // Remove previous progress callback to prevent listener accumulation
     if (this.currentProgressCallback) {
       autoUpdater.removeListener('download-progress', this.currentProgressCallback);
@@ -78,6 +78,13 @@ class UpdateManager {
     this.currentProgressCallback = progressCallback;
     if (progressCallback) {
       autoUpdater.on('download-progress', progressCallback);
+    }
+    
+    // electron-updater requires checkForUpdates to be called before downloadUpdate
+    // Re-check to ensure the update state is valid
+    if (!this.updateAvailable || !this.updateInfo) {
+      console.log('Re-checking for updates before download...');
+      await autoUpdater.checkForUpdates();
     }
     
     return autoUpdater.downloadUpdate();
