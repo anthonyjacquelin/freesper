@@ -102,15 +102,26 @@ async function checkAccessibilityPermissions() {
   console.log('   Dev mode:', isDevMode);
   console.log('   Is packaged:', isPackaged);
 
+  // Check for force accessibility test flag (for development testing)
+  const forceAccessibilityTest = process.argv.includes('--force-accessibility') ||
+                                 process.env.FORCE_ACCESSIBILITY_TEST === 'true';
+
   // In dev mode, just warn and continue without permissions
   // (Electron dev app won't appear properly in System Preferences)
-  if (isDevMode) {
+  // unless force accessibility test is enabled
+  if (isDevMode && !forceAccessibilityTest) {
     console.log('ℹ️  Development mode detected');
     console.log('   Accessibility permission check skipped');
     console.log('   Auto-paste disabled in dev (requires packaged app)');
     console.log('   Text will be copied to clipboard');
+    console.log('   💡 Tip: Use --force-accessibility flag to test auto-paste in dev mode');
     hasAccessibilityPermission = false;
     return false;
+  }
+
+  if (isDevMode && forceAccessibilityTest) {
+    console.log('🧪 Development mode with forced accessibility testing enabled');
+    console.log('   Note: You may need to manually add the Electron dev app to Accessibility permissions');
   }
 
   // Check if we already have permission (production only)
