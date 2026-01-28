@@ -358,7 +358,11 @@ function getActiveDisplay() {
     const cursorPos = screen.getCursorScreenPoint();
     const activeDisplay = screen.getDisplayNearestPoint(cursorPos);
 
-    console.log(`✓ Detected active display: ${activeDisplay.id} (${activeDisplay.bounds.width}x${activeDisplay.bounds.height})`);
+    console.log(`🎯 Cursor position: (${cursorPos.x}, ${cursorPos.y})`);
+    console.log(`📺 Detected active display: ${activeDisplay.id}`);
+    console.log(`   Bounds: (${activeDisplay.bounds.x}, ${activeDisplay.bounds.y}) ${activeDisplay.bounds.width}x${activeDisplay.bounds.height}`);
+    console.log(`   WorkArea: (${activeDisplay.workArea.x}, ${activeDisplay.workArea.y}) ${activeDisplay.workArea.width}x${activeDisplay.workArea.height}`);
+
     return activeDisplay;
   } catch (error) {
     console.warn('⚠️ Failed to detect active display, falling back to primary:', error.message);
@@ -403,10 +407,13 @@ async function showRecordingWindow() {
   const activeDisplay = getActiveDisplay();
   const { width, height } = activeDisplay.workAreaSize;
 
-  recordingWindow.setPosition(
-    Math.floor((width - 400) / 2),
-    Math.floor((height - 120) / 2)
-  );
+  // Calculate center position on the active display
+  const centerX = Math.floor(activeDisplay.bounds.x + (width - 400) / 2);
+  const centerY = Math.floor(activeDisplay.bounds.y + (height - 120) / 2);
+
+  console.log(`📍 Positioning recording window at (${centerX}, ${centerY}) on display ${activeDisplay.id}`);
+
+  recordingWindow.setPosition(centerX, centerY);
 
   recordingWindow.show();
 }
