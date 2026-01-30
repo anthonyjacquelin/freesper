@@ -48,11 +48,9 @@ function initFileLogging() {
       originalWarn.apply(console, args);
     };
     
-    console.log('=== Freesper started ===');
+    console.log('Freesper started');
     console.log('Log file:', logPath);
     console.log('App version:', app.getVersion());
-    console.log('Electron version:', process.versions.electron);
-    console.log('Is packaged:', app.isPackaged);
   } catch (err) {
     // Silently fail if logging setup fails
   }
@@ -88,11 +86,11 @@ let isProcessing = false; // Prevent double processing
  * Required for auto-paste functionality (simulating Cmd+V)
  */
 async function checkAccessibilityPermissions() {
-  console.log('🔍 Checking accessibility permissions...');
-  
+  console.log('Checking accessibility permissions...');
+
   if (process.platform !== 'darwin') {
     hasAccessibilityPermission = true;
-    console.log('   Platform is not macOS, permissions granted by default');
+    console.log('Platform is not macOS, permissions granted by default');
     return true;
   }
 
@@ -102,29 +100,35 @@ async function checkAccessibilityPermissions() {
   console.log('   Dev mode:', isDevMode);
   console.log('   Is packaged:', isPackaged);
 
+  // Check for force accessibility test flag (for development testing)
+  const forceAccessibilityTest = process.argv.includes('--force-accessibility') ||
+                                 process.env.FORCE_ACCESSIBILITY_TEST === 'true';
+
   // In dev mode, just warn and continue without permissions
   // (Electron dev app won't appear properly in System Preferences)
-  if (isDevMode) {
-    console.log('ℹ️  Development mode detected');
-    console.log('   Accessibility permission check skipped');
-    console.log('   Auto-paste disabled in dev (requires packaged app)');
-    console.log('   Text will be copied to clipboard');
+  // unless force accessibility test is enabled
+  if (isDevMode && !forceAccessibilityTest) {
+  console.log('Development mode detected - auto-paste disabled');
     hasAccessibilityPermission = false;
     return false;
   }
 
+  if (isDevMode && forceAccessibilityTest) {
+  console.log('Development mode with forced accessibility testing enabled');
+  }
+
   // Check if we already have permission (production only)
   const isTrusted = systemPreferences.isTrustedAccessibilityClient(false);
-  console.log('   isTrustedAccessibilityClient(false) returned:', isTrusted);
+  console.log('isTrustedAccessibilityClient returned:', isTrusted);
 
   if (isTrusted) {
     hasAccessibilityPermission = true;
-    console.log('✅ Accessibility permissions granted');
+    console.log('Accessibility permissions granted');
     return true;
   }
 
   // Show dialog explaining why we need permissions (production only)
-  console.log('⚠️  Accessibility permissions not yet granted, showing dialog...');
+  console.log('Accessibility permissions not yet granted, showing dialog...');
   
   await requestAccessibilityPermissions();
 
@@ -146,25 +150,25 @@ async function requestAccessibilityPermissions() {
   });
 
   if (response === 0) {
-    console.log('   User clicked "Open System Preferences", requesting permission...');
+    console.log('User clicked "Open System Preferences", requesting permission...');
     // Request permission - this will open System Preferences
     systemPreferences.isTrustedAccessibilityClient(true);
     
     // Wait for user to potentially grant permission
     await waitForAccessibilityPermission();
   } else {
-    console.log('   User clicked "Skip", auto-paste will be disabled');
+    console.log('User clicked "Skip", auto-paste will be disabled');
     showNotification('Auto-Paste Disabled', 'You can enable it later in Settings → Privacy & Security → Accessibility');
   }
 
   // Final check
   hasAccessibilityPermission = systemPreferences.isTrustedAccessibilityClient(false);
-  console.log('   Final permission status:', hasAccessibilityPermission);
+  console.log('Final permission status:', hasAccessibilityPermission);
   
   if (!hasAccessibilityPermission) {
     console.warn('⚠️  Accessibility permissions not granted - auto-paste disabled');
   } else {
-    console.log('✅ Accessibility permissions granted - auto-paste enabled');
+    console.log('Accessibility permissions granted - auto-paste enabled');
     showNotification('Auto-Paste Enabled', 'Transcribed text will be automatically pasted');
   }
 }
@@ -257,7 +261,7 @@ async function createTray() {
 
   if (fs.existsSync(iconPath)) {
     trayIcon = nativeImage.createFromPath(iconPath);
-    console.log('✓ Tray icon loaded from:', iconPath);
+    console.log('Tray icon loaded from:', iconPath);
   } else {
     console.warn('⚠️  Icon not found at:', iconPath);
     console.warn('   Creating app menu instead of tray icon...');
@@ -348,48 +352,80 @@ function createMainWindow() {
   }
 }
 
+/**
+ * Detect the active screen based on cursor position
+ * @returns {Electron.Display} The display where the cursor is located
+ */
+function getActiveDisplay() {
+  try {
+    const { screen } = require('electron');
+    const cursorPos = screen.getCursorScreenPoint();
+    const activeDisplay = screen.getDisplayNearestPoint(cursorPos);
+
+    return activeDisplay;
+  } catch (error) {
+    console.warn('⚠️ Failed to detect active display, falling back to primary:', error.message);
+    const { screen } = require('electron');
+    return screen.getPrimaryDisplay();
+  }
+}
+
+
 async function showRecordingWindow() {
-  if (!recordingWindow) {
-    recordingWindow = new BrowserWindow({
-      width: 400,
-      height: 120,
-      show: false,
-      frame: false,
-      transparent: true,
-      alwaysOnTop: true,
-      resizable: false,
-      webPreferences: {
-        nodeIntegration: true,
-        contextIsolation: false
-      }
-    });
-
-    recordingWindow.loadFile(path.join(__dirname, '../ui/recording.html'));
-
-    // Wait for the renderer to be ready before proceeding
-    await new Promise(resolve => {
-      recordingWindow.webContents.once('did-finish-load', resolve);
-    });
-
-    console.log('✓ Recording window loaded');
-
-    // Enable DevTools in dev mode for debugging
-    if (process.argv.includes('--dev')) {
-      recordingWindow.webContents.openDevTools({ mode: 'detach' });
-      console.log('✓ Recording window DevTools opened');
-    }
+  // Always recreate the window to ensure it appears on the current active space
+  if (recordingWindow) {
+    recordingWindow.destroy();
   }
 
-  // Center on screen
-  const { screen } = require('electron');
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { width, height } = primaryDisplay.workAreaSize;
+  recordingWindow = new BrowserWindow({
+    width: 400,
+    height: 120,
+    show: false,
+    frame: false,
+    transparent: true,
+    alwaysOnTop: true,
+    resizable: false,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false
+    }
+  });
 
-  recordingWindow.setPosition(
-    Math.floor((width - 400) / 2),
-    Math.floor((height - 120) / 2)
-  );
+  // Make window visible on all workspaces to prevent space switching
+  recordingWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
 
+  // Additional fullscreen overlay support for macOS
+  if (process.platform === 'darwin') {
+    recordingWindow.setWindowButtonVisibility(false);
+    // Force window to be above fullscreen apps
+    recordingWindow.setAlwaysOnTop(true, 'screen-saver');
+  }
+
+  recordingWindow.loadFile(path.join(__dirname, '../ui/recording.html'));
+
+  // Wait for the renderer to be ready before proceeding
+  await new Promise(resolve => {
+    recordingWindow.webContents.once('did-finish-load', resolve);
+  });
+
+  // Enable DevTools in dev mode for debugging
+  if (process.argv.includes('--dev')) {
+    recordingWindow.webContents.openDevTools({ mode: 'detach' });
+    console.log('✓ Recording window DevTools opened');
+  }
+
+  // Center on active screen (where cursor is located)
+  const activeDisplay = getActiveDisplay();
+  const { x, y, width, height } = activeDisplay.workArea;
+
+  // Calculate center position on the active display's work area
+  const centerX = Math.floor(x + (width - 400) / 2);
+  const centerY = Math.floor(y + (height - 120) / 2);
+
+  recordingWindow.setPosition(centerX, centerY);
+
+  // Force focus to current space and show window
+  recordingWindow.focus();
   recordingWindow.show();
 }
 
@@ -399,30 +435,31 @@ function hideRecordingWindow() {
   }
 }
 
+
 /**
  * Play a sound for audio feedback
  * @param {string} type - 'start' or 'stop'
  */
 function playBeep(type) {
-  if (!recordingWindow || recordingWindow.isDestroyed()) return;
-  
   // Get a random sound URL from the sound manager
   const soundUrl = soundManager.getRandomSoundUrl(type);
-  
+
   if (!soundUrl) {
     console.warn(`⚠️  No ${type} sound available`);
     return;
   }
-  
-  // Send message to recording window to play sound
-  recordingWindow.webContents.send('play-sound', { type, url: soundUrl });
+
+  // Send message to recording window
+  if (recordingWindow && !recordingWindow.isDestroyed()) {
+    recordingWindow.webContents.send('play-sound', { type, url: soundUrl });
+  }
 }
 
 async function toggleRecording() {
   console.log('toggleRecording called - isRecording:', isRecording, 'isProcessing:', isProcessing);
   
   if (isProcessing) {
-    console.log('⚠️  Already processing a recording, ignoring...');
+    console.log('Already processing a recording, ignoring...');
     return;
   }
   
@@ -435,7 +472,7 @@ async function toggleRecording() {
 
 async function startRecording() {
   if (!inferenceEngine.isModelLoaded()) {
-    console.log('❌ Cannot start recording: No model loaded');
+    console.log('Cannot start recording: No model loaded');
     showNotification('Model Required', 'Please download and activate a model before recording');
 
     // Also show the model manager to help user
@@ -446,6 +483,7 @@ async function startRecording() {
   }
 
   isRecording = true;
+
   await showRecordingWindow(); // Wait for window to be ready
 
   try {
@@ -469,7 +507,7 @@ async function startRecording() {
 async function stopRecording() {
   if (!isRecording) return;
   if (isProcessing) {
-    console.log('⚠️  Already processing, ignoring stopRecording');
+    console.log('Already processing, ignoring stopRecording');
     return;
   }
 
@@ -481,18 +519,18 @@ async function stopRecording() {
   // Play stop beep
   playBeep('stop');
 
-  console.log('📍 Sending recording-status: processing');
+  console.log('Sending recording-status: processing');
   recordingWindow.webContents.send('recording-status', { status: 'processing' });
 
   // Tell renderer to stop recording and send audio data
-  console.log('📍 Sending stop-audio-recording to renderer');
+  console.log('Sending stop-audio-recording to renderer');
   recordingWindow.webContents.send('stop-audio-recording');
-  console.log('✓ IPC messages sent to renderer');
+  console.log('IPC messages sent to renderer');
 }
 
 async function pasteToActiveApp() {
-  console.log('📍 pasteToActiveApp() called');
-  console.log('   Current hasAccessibilityPermission:', hasAccessibilityPermission);
+  console.log('pasteToActiveApp called');
+  console.log('hasAccessibilityPermission:', hasAccessibilityPermission);
 
   // Always re-check permissions before attempting paste
   if (process.platform === 'darwin') {
@@ -502,8 +540,8 @@ async function pasteToActiveApp() {
   }
 
   if (!hasAccessibilityPermission) {
-    console.log('⚠️  Auto-paste skipped: no accessibility permissions');
-    console.log('   Text has been copied to clipboard - paste manually with Cmd+V');
+    console.log('Auto-paste skipped: no accessibility permissions');
+    console.log('Text has been copied to clipboard - paste manually with Cmd+V');
     
     // Show notification with action hint
     showNotification('Text Copied - Paste with Cmd+V', 'Enable auto-paste via menu: Freesper → Enable Auto-Paste');
@@ -516,18 +554,18 @@ async function pasteToActiveApp() {
   const execAsync = promisify(exec);
 
   // Small delay to ensure focus is correct
-  console.log('   Waiting 150ms before paste...');
+    console.log('Waiting 150ms before paste...');
   await new Promise(resolve => setTimeout(resolve, 150));
 
   try {
-    console.log('   Executing AppleScript paste command...');
+    console.log('Executing AppleScript paste command...');
     // Simulate Command+V using AppleScript
     const { stdout, stderr } = await execAsync('osascript -e \'tell application "System Events" to keystroke "v" using command down\'', {
       timeout: 5000 // 5 second timeout
     });
-    console.log('✅ AppleScript paste succeeded');
-    if (stdout) console.log('   stdout:', stdout);
-    if (stderr) console.log('   stderr:', stderr);
+    console.log('AppleScript paste succeeded');
+    if (stdout) console.log('stdout:', stdout);
+    if (stderr) console.log('stderr:', stderr);
   } catch (error) {
     console.error('❌ Failed to paste:', error.message);
     console.error('   Error code:', error.code);
