@@ -416,11 +416,11 @@ async function showRecordingWindow() {
 
   // Center on active screen (where cursor is located)
   const activeDisplay = getActiveDisplay();
-  const { width, height } = activeDisplay.workAreaSize;
+  const { x, y, width, height } = activeDisplay.workArea;
 
-  // Calculate center position on the active display
-  const centerX = Math.floor(activeDisplay.bounds.x + (width - 400) / 2);
-  const centerY = Math.floor(activeDisplay.bounds.y + (height - 120) / 2);
+  // Calculate center position on the active display's work area
+  const centerX = Math.floor(x + (width - 400) / 2);
+  const centerY = Math.floor(y + (height - 120) / 2);
 
   recordingWindow.setPosition(centerX, centerY);
 
