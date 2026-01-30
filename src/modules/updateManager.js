@@ -33,6 +33,14 @@ class UpdateManager {
     });
 
     autoUpdater.on('update-available', (info) => {
+      // Workaround: electron-updater sometimes reports update-available even when versions match
+      const currentVersion = app.getVersion();
+      if (info.version === currentVersion) {
+        console.log('ℹ️ Server version matches current version, ignoring update-available event');
+        this.updateAvailable = false;
+        this.updateInfo = null;
+        return;
+      }
       console.log('✅ Update available:', info.version);
       this.updateAvailable = true;
       this.updateInfo = info;

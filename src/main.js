@@ -1140,7 +1140,8 @@ async function checkForUpdatesManually() {
   try {
     const result = await updateManager.checkForUpdates();
 
-    if (result && result.updateInfo) {
+    // Check both result and updateManager state (handles same-version edge case)
+    if (result && result.updateInfo && updateManager.updateAvailable) {
       console.log('✅ Update available:', result.updateInfo.version);
       createUpdateWindow(result.updateInfo);
     } else {
@@ -1479,7 +1480,8 @@ app.whenReady().then(async () => {
     setTimeout(() => {
       console.log('🔄 Checking for updates automatically...');
       updateManager.checkForUpdates().then(result => {
-        if (result && result.updateInfo) {
+        // Check both result and updateManager state (handles same-version edge case)
+        if (result && result.updateInfo && updateManager.updateAvailable) {
           console.log('✅ Update available:', result.updateInfo.version);
           createUpdateWindow(result.updateInfo);
         } else {
