@@ -76,7 +76,6 @@ files:
     size: ${size}
 path: ${zipFile}
 sha512: ${sha512}
-releaseDate: '${manifest.releaseDate}'
 `;
 
 fs.writeFileSync(manifestPath, ymlContent);
