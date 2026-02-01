@@ -12,6 +12,49 @@ const UpdateManager = require('./modules/updateManager');
 // Initialize store for settings
 const store = new Store();
 
+// === GLOBAL ERROR HANDLERS ===
+// Handle uncaught exceptions to prevent silent crashes
+process.on('uncaughtException', (error) => {
+  console.error('❌ UNCAUGHT EXCEPTION:', error);
+  console.error('Stack trace:', error.stack);
+  
+  // Try to recover state
+  try {
+    // Reset recording state to prevent lock-up
+    if (typeof isRecording !== 'undefined') isRecording = false;
+    if (typeof isProcessing !== 'undefined') isProcessing = false;
+    
+    // Try to hide recording window if it exists
+    if (recordingWindow && !recordingWindow.isDestroyed()) {
+      recordingWindow.hide();
+    }
+    
+    // Reset audio recorder if available
+    if (audioRecorder && typeof audioRecorder.reset === 'function') {
+      audioRecorder.reset();
+    }
+  } catch (recoveryError) {
+    console.error('Error during crash recovery:', recoveryError);
+  }
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ UNHANDLED PROMISE REJECTION at:', promise);
+  console.error('Reason:', reason);
+  
+  // Try to recover state
+  try {
+    if (typeof isRecording !== 'undefined') isRecording = false;
+    if (typeof isProcessing !== 'undefined') isProcessing = false;
+    
+    if (recordingWindow && !recordingWindow.isDestroyed()) {
+      recordingWindow.hide();
+    }
+  } catch (recoveryError) {
+    console.error('Error during rejection recovery:', recoveryError);
+  }
+});
+
 // === FILE LOGGING FOR PACKAGED APP ===
 // Redirect console.log/error to a file for debugging packaged app
 let logFile = null;
@@ -484,20 +527,25 @@ async function startRecording() {
 
   isRecording = true;
 
-  await showRecordingWindow(); // Wait for window to be ready
-
   try {
+    await showRecordingWindow(); // Wait for window to be ready
+
     // Just mark as recording - actual recording happens in renderer
     await audioRecorder.startRecording(recordingWindow);
 
-    // Tell renderer to start recording
-    recordingWindow.webContents.send('start-audio-recording');
-    recordingWindow.webContents.send('recording-status', { status: 'recording' });
+    // Tell renderer to start recording (with safety checks)
+    if (recordingWindow && !recordingWindow.isDestroyed()) {
+      recordingWindow.webContents.send('start-audio-recording');
+      recordingWindow.webContents.send('recording-status', { status: 'recording' });
+    } else {
+      throw new Error('Recording window was destroyed');
+    }
 
     // Play start beep
     setTimeout(() => playBeep('start'), 100);
   } catch (error) {
     console.error('Failed to start recording:', error);
+    console.error('Stack trace:', error.stack);
     isRecording = false;
     hideRecordingWindow();
     showNotification('Error', `Failed to start recording: ${error.message}`);
@@ -519,13 +567,30 @@ async function stopRecording() {
   // Play stop beep
   playBeep('stop');
 
-  console.log('Sending recording-status: processing');
-  recordingWindow.webContents.send('recording-status', { status: 'processing' });
+  try {
+    // Send recording status to renderer (with safety checks)
+    if (recordingWindow && !recordingWindow.isDestroyed()) {
+      console.log('Sending recording-status: processing');
+      recordingWindow.webContents.send('recording-status', { status: 'processing' });
 
-  // Tell renderer to stop recording and send audio data
-  console.log('Sending stop-audio-recording to renderer');
-  recordingWindow.webContents.send('stop-audio-recording');
-  console.log('IPC messages sent to renderer');
+      // Tell renderer to stop recording and send audio data
+      console.log('Sending stop-audio-recording to renderer');
+      recordingWindow.webContents.send('stop-audio-recording');
+      console.log('IPC messages sent to renderer');
+    } else {
+      console.error('❌ Recording window not available for IPC communication');
+      throw new Error('Recording window unavailable');
+    }
+  } catch (error) {
+    console.error('❌ Error in stopRecording:', error);
+    console.error('Stack trace:', error.stack);
+    
+    // Reset state and hide window
+    isProcessing = false;
+    isRecording = false;
+    hideRecordingWindow();
+    showNotification('Error', 'Failed to stop recording properly');
+  }
 }
 
 async function pasteToActiveApp() {
@@ -899,9 +964,20 @@ ipcMain.handle('audio-data-recorded', async (event, audioData) => {
     console.error('Stack:', error.stack);
 
     // Reset audio recorder
-    audioRecorder.reset();
+    try {
+      audioRecorder.reset();
+    } catch (resetError) {
+      console.error('Error resetting audio recorder:', resetError);
+    }
 
-    recordingWindow.webContents.send('transcription-error', { error: error.message });
+    // Send error to renderer if window is still available
+    try {
+      if (recordingWindow && !recordingWindow.isDestroyed()) {
+        recordingWindow.webContents.send('transcription-error', { error: error.message });
+      }
+    } catch (ipcError) {
+      console.error('Error sending transcription-error to renderer:', ipcError);
+    }
 
     setTimeout(() => {
       hideRecordingWindow();
@@ -1042,9 +1118,34 @@ function registerHotkeys() {
   
   console.log('Registering global hotkey:', hotkey);
 
-  const success = globalShortcut.register(hotkey, () => {
-    console.log('Hotkey triggered:', hotkey);
-    toggleRecording();
+  const success = globalShortcut.register(hotkey, async () => {
+    try {
+      console.log('Hotkey triggered:', hotkey);
+      await toggleRecording();
+    } catch (error) {
+      console.error('❌ Error in hotkey handler:', error);
+      console.error('Stack trace:', error.stack);
+      
+      // Reset state on error
+      isRecording = false;
+      isProcessing = false;
+      
+      // Try to hide recording window
+      try {
+        if (recordingWindow && !recordingWindow.isDestroyed()) {
+          hideRecordingWindow();
+        }
+      } catch (hideError) {
+        console.error('Error hiding window during error recovery:', hideError);
+      }
+      
+      // Show error notification
+      try {
+        showNotification('Recording Error', 'An error occurred during recording. Please try again.');
+      } catch (notifError) {
+        console.error('Failed to show error notification:', notifError);
+      }
+    }
   });
 
   if (success) {
