@@ -1119,6 +1119,12 @@ function registerHotkeys() {
   console.log('Registering global hotkey:', hotkey);
 
   const success = globalShortcut.register(hotkey, async () => {
+    // Guard against rapid repeated hotkey presses
+    if (isProcessing) {
+      console.log('Hotkey ignored: Already processing');
+      return;
+    }
+    
     try {
       console.log('Hotkey triggered:', hotkey);
       await toggleRecording();
